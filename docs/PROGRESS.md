@@ -16,12 +16,16 @@
 - `docs/PLAN.md`（ドラフト）、`docs/DECISIONS.md`、`docs/EXPERIMENTS.md`、`docs/RELEASES.md`、`reports/phase0.md`（ドラフト）
 
 ## 次にやること
-1. `python -m src.analysis.phase0_candidates` の結果（実行中、2026-10-04 開始）を PLAN.md 第4章に記入し、N を提案
-2. `reports/phase0.md` を完成させ、フェーズ0の承認を依頼する
+1. **フェーズ0の承認待ち**（`reports/phase0.md` の「承認・判断をお願いしたいこと」5点）
+2. 承認後、フェーズ1：ユーザーが Standard を契約 → データ取得と品質チェック → ホールドアウト開始日を `config/base.yaml` に固定
+
+## 候補銘柄数の確認（完了）
+- N=3 で買える銘柄は449〜469（ユニバース1,021〜1,109）。結果は `reports/phase0_candidates.json`、PLAN.md 第4章
+- 祝日の区分（HolDiv=3）を読み違えた誤りを修正し、2日分を取り直した
 
 ## 未解決の問題・ユーザーへの確認事項
 - `git push` と J-Quants API への接続はユーザーが許可（2026-10-04）。GitHub への初回送信は完了（コミットのメールは noreply に変更）
-- CLAUDE.md に第12章（会話の圧縮への備え）が追記されている（作業ツリーの変更・未コミット）。ユーザーの追記として扱い従う。コミットしてよいか確認中
+- CLAUDE.md 第12章（会話の圧縮への備え）はユーザーの追記。ユーザーの指示でコミット・送信済み
 - `.env` は作成済み（キー設定済み）。`.env.example` が `.env` に名前変更されていたため、ひな形を git から復元した。API キーがコミット対象・履歴に含まれないことを確認済み
 - GitHub：`origin` = https://github.com/keisuke-sunahara/small-cap-stock.git（リモートは空であることを確認済み）
 - 評価役：同じPCの `evaluator/` で、ユーザーご本人が起動・管理。データは私的利用の範囲で外部共有なし（2026-10-04 回答）→ 利用規約第8条の懸念は解消

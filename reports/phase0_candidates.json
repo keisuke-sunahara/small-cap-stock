@@ -1,0 +1,54 @@
+[
+  {
+    "date": "2024-09-30",
+    "listed_common": 3834,
+    "universe": 1067,
+    "price_quantiles": [
+      626.0,
+      1165.0,
+      1882.0
+    ],
+    "affordable_N2": 669,
+    "affordable_N3": 461,
+    "affordable_N5": 252
+  },
+  {
+    "date": "2024-12-27",
+    "listed_common": 3849,
+    "universe": 1021,
+    "price_quantiles": [
+      574.0,
+      1103.0,
+      1881.0
+    ],
+    "affordable_N2": 664,
+    "affordable_N3": 449,
+    "affordable_N5": 264
+  },
+  {
+    "date": "2025-03-31",
+    "listed_common": 3832,
+    "universe": 1109,
+    "price_quantiles": [
+      587.0,
+      1170.0,
+      1921.0
+    ],
+    "affordable_N2": 694,
+    "affordable_N3": 465,
+    "affordable_N5": 286
+  },
+  {
+    "date": "2025-06-30",
+    "listed_common": 3814,
+    "universe": 1043,
+    "price_quantiles": [
+      552.0,
+      1116.0,
+      1938.0
+    ],
+    "affordable_N2": 665,
+    "affordable_N3": 469,
+    "affordable_N5": 284
+  }
+]
