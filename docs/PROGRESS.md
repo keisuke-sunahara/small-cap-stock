@@ -16,15 +16,16 @@
 - `docs/PLAN.md`（ドラフト）、`docs/DECISIONS.md`、`docs/EXPERIMENTS.md`、`docs/RELEASES.md`、`reports/phase0.md`（ドラフト）
 
 ## 次にやること
-1. ユーザーから J-Quants の API キー（Free プランで可）を `.env` に設定してもらう → `python -m src.analysis.phase0_candidates` を実行し、PLAN.md 第4章に候補数と N の提案を記入
-2. ユーザーが作った GitHub の非公開リポジトリを `origin` に設定し、API キーが含まれないことを確認してから push
+1. `python -m src.analysis.phase0_candidates` を実行し、PLAN.md 第4章に候補数と N の提案を記入
+2. `git push -u origin main`（remote は設定済み）
 3. `reports/phase0.md` を完成させ、フェーズ0の承認を依頼する
 
 ## 未解決の問題・ユーザーへの確認事項
-- J-Quants の API キー（Free 登録で可。登録はユーザーご本人が行う）
-- GitHub の非公開リポジトリの URL
+- **Claude Code の権限設定で、`git push` と J-Quants API への接続が拒否された（2026-10-04）。** ユーザーに、許可するか、ご自身で実行するかを確認中。迂回はしていない
+- `.env` は作成済み（キー設定済み）。`.env.example` が `.env` に名前変更されていたため、ひな形を git から復元した。API キーがコミット対象・履歴に含まれないことを確認済み
+- GitHub：`origin` = https://github.com/keisuke-sunahara/small-cap-stock.git（リモートは空であることを確認済み）
+- 評価役：同じPCの `evaluator/` で、ユーザーご本人が起動・管理。データは私的利用の範囲で外部共有なし（2026-10-04 回答）→ 利用規約第8条の懸念は解消
 - J-Quants への問い合わせ：Standard → Light に下げたとき、5年より古いデータを保持してよいか
-- 評価役はユーザーご本人の管理下で動くか（J-Quants の私的使用の範囲の確認）
 - PLAN.md 第7.1節（ルールの細部4点）、第9章（合格基準の追加3点）、第10章（CLAUDE.md の改善提案5点）への判断
 
 ## 最終更新日時

@@ -81,7 +81,8 @@ def main() -> None:
 
     cfg = load_config()
     client = client_from_config(cfg, rate_limit_per_min=args.rate)
-    cal = client.get_all("/markets/calendar", **{"from": "2024-07-01", "to": SAFE_MAX_DATE.isoformat()})
+    # Free プランの取得範囲（2年12週前〜）に収まるよう、開始は 2024-08-01 とする
+    cal = client.get_all("/markets/calendar", **{"from": "2024-08-01", "to": SAFE_MAX_DATE.isoformat()})
     bdays = business_days(cal)
 
     results = []
