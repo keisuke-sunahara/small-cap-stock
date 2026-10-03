@@ -14,6 +14,9 @@
   - `python -m src.data.fetch --datasets master bars --rate 60`
   - `python -m src.data.fetch --datasets summary earnings_date --rate 48`
 
+## ユーザーの指示（2026-10-04 夜）
+- **取得の完了 → 品質チェック → `reports/phase1.md` の作成まで進めて止まる。ユーザーが結果を確認するまでフェーズ2に進まない**（通常はフェーズ1→2は自動だが、今回はユーザーの指示で止める）
+
 ## フェーズ1の残り
 1. 取得の完了を確認（各データの日数・件数）
 2. 品質チェック（欠損、異常値、分割調整、上場廃止銘柄、日ごとの銘柄数の推移、普通株の判定）→ `reports/phase1.md`
