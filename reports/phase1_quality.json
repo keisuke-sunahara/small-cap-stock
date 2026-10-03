@@ -1,0 +1,564 @@
+{
+  "period": [
+    "2016-10-05",
+    "2025-09-28"
+  ],
+  "coverage": {
+    "master": {
+      "target_days": 2194,
+      "missing_days": 0,
+      "missing_sample": []
+    },
+    "bars": {
+      "target_days": 2194,
+      "missing_days": 0,
+      "missing_sample": []
+    },
+    "summary": {
+      "target_days": 3281,
+      "missing_days": 0,
+      "missing_sample": []
+    },
+    "earnings_date": {
+      "target_days": 3281,
+      "missing_days": 0,
+      "missing_sample": []
+    }
+  },
+  "calendar": {
+    "holdiv_counts": {
+      "1": 2194,
+      "0": 1052,
+      "3": 35
+    },
+    "business_days_per_year": {
+      "2016": 59,
+      "2017": 247,
+      "2018": 245,
+      "2019": 241,
+      "2020": 243,
+      "2021": 245,
+      "2022": 244,
+      "2023": 246,
+      "2024": 245,
+      "2025": 179
+    }
+  },
+  "master": {
+    "snapshots": {
+      "2016-10-05": {
+        "rows": 3815,
+        "common": 3506,
+        "ProdCat": {
+          "011": 3523,
+          "014": 157,
+          "023": 67,
+          "013": 58,
+          "021": 8,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 1986,
+          "JASDAQ スタンダード": 720,
+          "東証二部": 538,
+          "その他": 281,
+          "マザーズ": 230,
+          "JASDAQ グロース": 44,
+          "TOKYO PRO MARKET": 16
+        }
+      },
+      "2016-12-28": {
+        "rows": 3829,
+        "common": 3517,
+        "ProdCat": {
+          "011": 3534,
+          "014": 158,
+          "023": 69,
+          "013": 60,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2008,
+          "JASDAQ スタンダード": 715,
+          "東証二部": 533,
+          "その他": 286,
+          "マザーズ": 228,
+          "JASDAQ グロース": 43,
+          "TOKYO PRO MARKET": 16
+        }
+      },
+      "2016-12-30": {
+        "rows": 3829,
+        "common": 3517,
+        "ProdCat": {
+          "011": 3534,
+          "014": 158,
+          "023": 69,
+          "013": 60,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2008,
+          "JASDAQ スタンダード": 715,
+          "東証二部": 533,
+          "その他": 286,
+          "マザーズ": 228,
+          "JASDAQ グロース": 43,
+          "TOKYO PRO MARKET": 16
+        }
+      },
+      "2017-12-28": {
+        "rows": 3924,
+        "common": 3575,
+        "ProdCat": {
+          "011": 3598,
+          "014": 183,
+          "023": 72,
+          "013": 63,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2067,
+          "JASDAQ スタンダード": 709,
+          "東証二部": 520,
+          "その他": 317,
+          "マザーズ": 248,
+          "JASDAQ グロース": 41,
+          "TOKYO PRO MARKET": 22
+        }
+      },
+      "2018-12-28": {
+        "rows": 3971,
+        "common": 3621,
+        "ProdCat": {
+          "011": 3651,
+          "014": 186,
+          "013": 66,
+          "023": 61,
+          "021": 5,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2132,
+          "JASDAQ スタンダード": 690,
+          "東証二部": 495,
+          "その他": 312,
+          "マザーズ": 276,
+          "JASDAQ グロース": 37,
+          "TOKYO PRO MARKET": 29
+        }
+      },
+      "2019-12-30": {
+        "rows": 4019,
+        "common": 3669,
+        "ProdCat": {
+          "011": 3703,
+          "014": 179,
+          "013": 70,
+          "023": 61,
+          "021": 4,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2163,
+          "JASDAQ スタンダード": 671,
+          "東証二部": 490,
+          "マザーズ": 316,
+          "その他": 309,
+          "JASDAQ グロース": 37,
+          "TOKYO PRO MARKET": 33
+        }
+      },
+      "2020-12-28": {
+        "rows": 4088,
+        "common": 3711,
+        "ProdCat": {
+          "011": 3754,
+          "014": 195,
+          "013": 69,
+          "023": 64,
+          "021": 4,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2189,
+          "JASDAQ スタンダード": 669,
+          "東証二部": 479,
+          "マザーズ": 346,
+          "その他": 327,
+          "TOKYO PRO MARKET": 41,
+          "JASDAQ グロース": 37
+        }
+      },
+      "2020-12-30": {
+        "rows": 4088,
+        "common": 3711,
+        "ProdCat": {
+          "011": 3754,
+          "014": 195,
+          "013": 69,
+          "023": 64,
+          "021": 4,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2189,
+          "JASDAQ スタンダード": 669,
+          "東証二部": 478,
+          "マザーズ": 347,
+          "その他": 327,
+          "TOKYO PRO MARKET": 41,
+          "JASDAQ グロース": 37
+        }
+      },
+      "2021-12-28": {
+        "rows": 4171,
+        "common": 3770,
+        "ProdCat": {
+          "011": 3818,
+          "014": 215,
+          "013": 68,
+          "023": 62,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2187,
+          "JASDAQ スタンダード": 659,
+          "東証二部": 474,
+          "マザーズ": 423,
+          "その他": 344,
+          "TOKYO PRO MARKET": 47,
+          "JASDAQ グロース": 37
+        }
+      },
+      "2021-12-30": {
+        "rows": 4170,
+        "common": 3769,
+        "ProdCat": {
+          "011": 3817,
+          "014": 215,
+          "013": 68,
+          "023": 62,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "東証一部": 2185,
+          "JASDAQ スタンダード": 659,
+          "東証二部": 474,
+          "マザーズ": 424,
+          "その他": 344,
+          "TOKYO PRO MARKET": 47,
+          "JASDAQ グロース": 37
+        }
+      },
+      "2022-12-28": {
+        "rows": 4247,
+        "common": 3800,
+        "ProdCat": {
+          "011": 3865,
+          "014": 246,
+          "013": 67,
+          "023": 61,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "プライム": 1840,
+          "スタンダード": 1454,
+          "グロース": 515,
+          "その他": 374,
+          "TOKYO PRO MARKET": 64
+        }
+      },
+      "2022-12-30": {
+        "rows": 4246,
+        "common": 3799,
+        "ProdCat": {
+          "011": 3864,
+          "014": 246,
+          "013": 67,
+          "023": 61,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "プライム": 1839,
+          "スタンダード": 1453,
+          "グロース": 516,
+          "その他": 374,
+          "TOKYO PRO MARKET": 64
+        }
+      },
+      "2023-12-28": {
+        "rows": 4337,
+        "common": 3838,
+        "ProdCat": {
+          "011": 3930,
+          "014": 287,
+          "013": 63,
+          "023": 49,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "プライム": 1659,
+          "スタンダード": 1623,
+          "グロース": 566,
+          "その他": 399,
+          "TOKYO PRO MARKET": 90
+        }
+      },
+      "2024-12-30": {
+        "rows": 4414,
+        "common": 3836,
+        "ProdCat": {
+          "011": 3973,
+          "014": 320,
+          "013": 62,
+          "023": 51,
+          "021": 6,
+          "012": 2
+        },
+        "Mkt": {
+          "プライム": 1644,
+          "スタンダード": 1594,
+          "グロース": 610,
+          "その他": 433,
+          "TOKYO PRO MARKET": 133
+        }
+      },
+      "2025-09-26": {
+        "rows": 4412,
+        "common": 3785,
+        "ProdCat": {
+          "011": 3940,
+          "014": 350,
+          "013": 63,
+          "023": 52,
+          "021": 5,
+          "012": 2
+        },
+        "Mkt": {
+          "プライム": 1618,
+          "スタンダード": 1573,
+          "グロース": 605,
+          "その他": 465,
+          "TOKYO PRO MARKET": 151
+        }
+      }
+    },
+    "last_date": "2025-09-26",
+    "prodcat011_code_not_ending_0": {
+      "count": 4,
+      "names": [
+        "伊藤園（優先株式）",
+        "インフロニア・ホールディングス（優先株式）",
+        "ソフトバンク（優先株式）",
+        "ソフトバンク（優先株式）"
+      ]
+    },
+    "prodcat011_other_market": {
+      "count": 151,
+      "markets": {
+        "TOKYO PRO MARKET": 151
+      }
+    },
+    "common_per_day": {
+      "min": 3503,
+      "max": 3839,
+      "first": 3506,
+      "last": 3785
+    }
+  },
+  "bars": {
+    "rows_per_day": {
+      "min": 3813,
+      "max": 4418,
+      "median": 4102.5
+    },
+    "days_missing_in_bars": [],
+    "days_rows_drop_over_10pct": {},
+    "days_no_trade_over_50pct": {
+      "2020-10-01": 1.0
+    },
+    "no_trade_rows": 301387,
+    "no_trade_ratio": 0.03336,
+    "no_trade_ratio_common": 0.01339,
+    "common_codes_traded_under_50pct_of_days": 5,
+    "partial_null_rows": 0,
+    "invalid": {
+      "nonpositive_price": 0,
+      "low_gt_high": 0,
+      "open_or_close_outside_range": 0,
+      "zero_volume_with_price": 0
+    },
+    "vwap_outside_range_rows": 0,
+    "limit_flags": {
+      "UL_rows": 22930,
+      "LL_rows": 5613
+    },
+    "adjfactor_events": {
+      "count": 2149,
+      "codes": 1698,
+      "values_top": {
+        "0.5": 920,
+        "10.0": 359,
+        "0.3333": 261,
+        "5.0": 210,
+        "0.2": 102,
+        "0.25": 98,
+        "2.0": 53,
+        "0.1": 38,
+        "0.9091": 24,
+        "0.8333": 12
+      }
+    },
+    "split_days": {
+      "n": 2107,
+      "abs_raw_return_median": 0.6608,
+      "abs_adj_return_median": 0.0193,
+      "adj_return_over_50pct": 0
+    },
+    "adjusted_daily_returns": {
+      "n": 8726615,
+      "abs_over_50pct": 249,
+      "quantiles": {
+        "0.001": -0.1495,
+        "0.01": -0.0661,
+        "0.5": 0.0,
+        "0.99": 0.0769,
+        "0.999": 0.2
+      },
+      "extreme_by_year": {
+        "2016": 5,
+        "2017": 20,
+        "2018": 7,
+        "2019": 7,
+        "2020": 56,
+        "2021": 52,
+        "2022": 18,
+        "2023": 26,
+        "2024": 34,
+        "2025": 24
+      }
+    },
+    "raw_return_over_50pct_without_adjfactor": 275,
+    "delisted": {
+      "codes_total": 5171,
+      "codes_ended_before_last_day": 759,
+      "ended_by_year": {
+        "2016": 20,
+        "2017": 42,
+        "2018": 81,
+        "2019": 69,
+        "2020": 65,
+        "2021": 106,
+        "2022": 86,
+        "2023": 85,
+        "2024": 108,
+        "2025": 97
+      },
+      "started_after_first_day_by_year": {
+        "2016": 34,
+        "2017": 137,
+        "2018": 129,
+        "2019": 116,
+        "2020": 135,
+        "2021": 188,
+        "2022": 161,
+        "2023": 176,
+        "2024": 185,
+        "2025": 95
+      },
+      "ended_but_missing_from_master_on_last_day": 0
+    },
+    "common_in_master_without_bars_rows": 0,
+    "bars_without_master_rows": 0,
+    "longest_no_trade_runs_days": [
+      2194,
+      2194,
+      2012,
+      1934,
+      1812
+    ]
+  },
+  "topix": {
+    "rows": 2194,
+    "missing_bdays": [],
+    "abs_daily_return_max": 0.1223,
+    "null_close": 0
+  },
+  "summary": {
+    "rows": 172128,
+    "rows_per_year": {
+      "2016": 5024,
+      "2017": 19085,
+      "2018": 18625,
+      "2019": 18679,
+      "2020": 19687,
+      "2021": 19660,
+      "2022": 19035,
+      "2023": 19139,
+      "2024": 19035,
+      "2025": 14159
+    },
+    "DocType_top": {
+      "FYFinancialStatements_Consolidated_JP": 29590,
+      "1QFinancialStatements_Consolidated_JP": 27896,
+      "2QFinancialStatements_Consolidated_JP": 27878,
+      "3QFinancialStatements_Consolidated_JP": 27780,
+      "EarnForecastRevision": 25156,
+      "FYFinancialStatements_NonConsolidated_JP": 4994,
+      "1QFinancialStatements_NonConsolidated_JP": 4768,
+      "3QFinancialStatements_NonConsolidated_JP": 4756,
+      "2QFinancialStatements_NonConsolidated_JP": 4726,
+      "DividendForecastRevision": 4265,
+      "1QFinancialStatements_Consolidated_IFRS": 2097,
+      "FYFinancialStatements_Consolidated_IFRS": 2072,
+      "2QFinancialStatements_Consolidated_IFRS": 1957,
+      "3QFinancialStatements_Consolidated_IFRS": 1927,
+      "FYFinancialStatements_Consolidated_REIT": 1095
+    },
+    "DocType_kinds": 34,
+    "DiscTime_bad_format": 0,
+    "DiscTime_share": {
+      "before_15:00": 0.1723,
+      "15:00_to_15:30": 0.4212,
+      "15:30_or_later": 0.4065
+    },
+    "duplicate_DiscNo": 0,
+    "dates_with_weekend_disclosure": 31,
+    "ShOutFY_blank_ratio_in_FinancialStatements": 0.0013,
+    "common_with_statement_in_last_365d": 0.9989
+  },
+  "earnings_date": {
+    "rows": 138974,
+    "rows_per_year": {
+      "2016": 3495,
+      "2017": 14683,
+      "2018": 14822,
+      "2019": 15109,
+      "2020": 16147,
+      "2021": 15769,
+      "2022": 15620,
+      "2023": 15953,
+      "2024": 15827,
+      "2025": 11549
+    },
+    "SchDate_blank_ratio": 0.0039,
+    "SchDate_before_PubDate": 1,
+    "FQName": {
+      "FY": 36695,
+      "3Q": 34197,
+      "1Q": 34098,
+      "2Q": 33984
+    },
+    "lead_days_median": 53.0,
+    "common_with_schedule_in_last_365d": 0.9968
+  }
+}

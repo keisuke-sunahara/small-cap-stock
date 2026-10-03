@@ -107,11 +107,19 @@ def check_bars(bars: pd.DataFrame, master: pd.DataFrame, bdays: list[str]) -> tu
     # 前日比で10%以上銘柄数が減った日
     drop = per_day["rows"] / per_day["rows"].shift(1) - 1
     res["days_rows_drop_over_10pct"] = drop[drop < -0.10].round(3).to_dict()
+    # 営業日なのに大半の銘柄で売買が成立しなかった日（システム障害による終日停止など）
+    nt_ratio = per_day["no_trade"] / per_day["rows"]
+    res["days_no_trade_over_50pct"] = nt_ratio[nt_ratio > 0.5].round(3).to_dict()
 
     ohlc = ["O", "H", "L", "C", "Vo", "Va"]
     nulls = bars[ohlc].isna()
     res["no_trade_rows"] = int(nulls["C"].sum())
     res["no_trade_ratio"] = round(float(nulls["C"].mean()), 5)
+    common_keys = master.loc[is_common(master), ["Date", "Code"]]
+    cb = bars.merge(common_keys, on=["Date", "Code"])
+    res["no_trade_ratio_common"] = round(float(cb["C"].isna().mean()), 5)
+    traded_ratio = cb.groupby("Code")["C"].apply(lambda s: s.notna().mean())
+    res["common_codes_traded_under_50pct_of_days"] = int((traded_ratio < 0.5).sum())
     res["partial_null_rows"] = int((nulls.any(axis=1) & ~nulls.all(axis=1)).sum())
     t = bars[bars["C"].notna()]
     res["invalid"] = {
