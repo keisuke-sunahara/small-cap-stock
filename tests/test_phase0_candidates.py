@@ -5,10 +5,12 @@ from src.analysis.phase0_candidates import business_days, count_affordable, scre
 from src.config import load_config
 
 
-def test_business_days_excludes_holdiv_zero():
-    cal = [{"Date": "2025-01-01", "HolDiv": "0"}, {"Date": "2025-01-06", "HolDiv": "1"},
-           {"Date": "2025-01-04", "HolDiv": "0"}]
-    assert business_days(cal) == ["2025-01-06"]
+def test_business_days_excludes_holidays_including_holiday_trading_days():
+    # 2025-03-20（春分の日）は HolDiv "3"：東証は休み、大阪取引所のみ祝日取引
+    cal = [{"Date": "2025-03-19", "HolDiv": "1"}, {"Date": "2025-03-20", "HolDiv": "3"},
+           {"Date": "2025-03-21", "HolDiv": "1"}, {"Date": "2025-03-22", "HolDiv": "0"},
+           {"Date": "2025-03-24", "HolDiv": "2"}]
+    assert business_days(cal) == ["2025-03-19", "2025-03-21", "2025-03-24"]
 
 
 def test_count_affordable_lot_and_adv_limits():

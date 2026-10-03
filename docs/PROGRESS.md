@@ -16,12 +16,12 @@
 - `docs/PLAN.md`（ドラフト）、`docs/DECISIONS.md`、`docs/EXPERIMENTS.md`、`docs/RELEASES.md`、`reports/phase0.md`（ドラフト）
 
 ## 次にやること
-1. `python -m src.analysis.phase0_candidates` を実行し、PLAN.md 第4章に候補数と N の提案を記入
-2. `git push -u origin main`（remote は設定済み）
-3. `reports/phase0.md` を完成させ、フェーズ0の承認を依頼する
+1. `python -m src.analysis.phase0_candidates` の結果（実行中、2026-10-04 開始）を PLAN.md 第4章に記入し、N を提案
+2. `reports/phase0.md` を完成させ、フェーズ0の承認を依頼する
 
 ## 未解決の問題・ユーザーへの確認事項
-- **Claude Code の権限設定で、`git push` と J-Quants API への接続が拒否された（2026-10-04）。** ユーザーに、許可するか、ご自身で実行するかを確認中。迂回はしていない
+- `git push` と J-Quants API への接続はユーザーが許可（2026-10-04）。GitHub への初回送信は完了（コミットのメールは noreply に変更）
+- CLAUDE.md に第12章（会話の圧縮への備え）が追記されている（作業ツリーの変更・未コミット）。ユーザーの追記として扱い従う。コミットしてよいか確認中
 - `.env` は作成済み（キー設定済み）。`.env.example` が `.env` に名前変更されていたため、ひな形を git から復元した。API キーがコミット対象・履歴に含まれないことを確認済み
 - GitHub：`origin` = https://github.com/keisuke-sunahara/small-cap-stock.git（リモートは空であることを確認済み）
 - 評価役：同じPCの `evaluator/` で、ユーザーご本人が起動・管理。データは私的利用の範囲で外部共有なし（2026-10-04 回答）→ 利用規約第8条の懸念は解消

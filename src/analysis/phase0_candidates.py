@@ -23,9 +23,12 @@ COMMON_MARKET_NAMES = ("プライム", "スタンダード", "グロース")
 N_CANDIDATES = (2, 3, 5)
 
 
+TSE_BUSINESS_HOLDIV = {"1", "2"}  # 1: 営業日、2: 東証半日立会日
+
+
 def business_days(calendar_rows: list[dict]) -> list[str]:
-    # HolDiv: "0" は非営業日。それ以外（営業日・半日立会）を営業日とする
-    return sorted(r["Date"] for r in calendar_rows if str(r["HolDiv"]) != "0")
+    # HolDiv "0" は非営業日、"3" は東証は休みで大阪取引所のみ祝日取引がある日（2025-03-20 で確認）
+    return sorted(r["Date"] for r in calendar_rows if str(r["HolDiv"]) in TSE_BUSINESS_HOLDIV)
 
 
 def screen(master: pd.DataFrame, bars: pd.DataFrame, valuation: pd.DataFrame, as_of: str,
@@ -91,11 +94,16 @@ def main() -> None:
             raise SystemExit(f"{as_of} は営業日ではありません")
         idx = bdays.index(as_of)
         window_days = bdays[idx - cfg["universe"]["turnover_window"] + 1: idx + 1]
+        print(f"[{as_of}] 取得開始（銘柄一覧1・株価{len(window_days)}・指標1 日分）", flush=True)
         master = pd.DataFrame(client.get_all("/equities/master", date=as_of))
         if not results:
-            print("市場区分の内訳:", master["MktNm"].value_counts().to_dict())
-            print("商品区分の内訳:", master.get("ProdCat", pd.Series(dtype=str)).value_counts().to_dict())
-        bars = pd.concat([pd.DataFrame(client.get_all("/equities/bars/daily", date=d)) for d in window_days])
+            print("市場区分の内訳:", master["MktNm"].value_counts().to_dict(), flush=True)
+            print("商品区分の内訳:", master.get("ProdCat", pd.Series(dtype=str)).value_counts().to_dict(), flush=True)
+        frames = []
+        for i, d in enumerate(window_days, 1):
+            frames.append(pd.DataFrame(client.get_all("/equities/bars/daily", date=d)))
+            print(f"[{as_of}] 株価 {i}/{len(window_days)} 日分", flush=True)
+        bars = pd.concat(frames)
         bars = to_num(bars, ["C", "Va"])
         valuation = to_num(pd.DataFrame(client.get_all("/equities/valuation", date=as_of)), ["MktCap"])
         uni = screen(master, bars, valuation, as_of, cfg)
@@ -106,11 +114,15 @@ def main() -> None:
         for n in N_CANDIDATES:
             row[f"affordable_N{n}"] = count_affordable(uni, cfg["capital"]["initial_capital_jpy"], n,
                                                        cfg["order"]["lot_size"], cfg["order"]["max_order_to_adv"])
-        print(json.dumps(row, ensure_ascii=False))
+        print(json.dumps(row, ensure_ascii=False), flush=True)
         results.append(row)
 
+    # 既存の結果があれば、今回取り直した日付だけを置き換える
     out = ROOT / "reports" / "phase0_candidates.json"
-    out.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+    previous = json.loads(out.read_text(encoding="utf-8")) if out.exists() else []
+    rerun = {r["date"] for r in results}
+    merged = sorted([r for r in previous if r["date"] not in rerun] + results, key=lambda r: r["date"])
+    out.write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"保存: {out}")
 
 
