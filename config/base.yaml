@@ -1,0 +1,59 @@
+# 共通の設定。実験ごとの違いは experiments/EXP-xxx/config.yaml に差分だけを書く。
+# 値の意味と決めた理由は docs/PLAN.md・docs/DECISIONS.md を参照。
+
+project:
+  timezone: Asia/Tokyo
+  random_seed: 42
+
+data:
+  provider: jquants
+  api_base_url: https://api.jquants.com/v2
+  plan: standard              # フェーズ1開始時に契約予定
+  rate_limit_per_min: 120     # Standardプランの上限
+  rate_limit_safety: 0.8      # 上限の8割までに抑える
+  fins_rate_limit_per_min: 60 # /fins/summary は個別に60件/分
+  start_date: null            # フェーズ1で、契約プランで取得できる最古日に決める
+  # ホールドアウト（最終評価用）の開始日。フェーズ1で固定し、以後変更しない。
+  # この日以降のデータはフェーズ5まで読み込み・集計・グラフ化をしない。
+  holdout_start: null
+
+backtest:
+  # 過去の売買単位データが無いため、売買単位が100株に統一された2018-10-01以降に限定する（DECISIONS.md参照）
+  trade_start_date: "2018-10-01"
+
+capital:
+  initial_capital_jpy: 300000
+  n_holdings: 3
+
+order:
+  limit_up_pct: 0.02          # 買い指値 = 前営業日終値 × (1 + 0.02) を呼値で切り下げ
+  lot_size: 100
+  max_order_to_adv: 0.01      # 1銘柄の注文金額 ≤ 過去20営業日平均売買代金の1%
+  adv_window: 20
+
+cost:
+  one_way: 0.003              # 手数料＋スリッページ（片道）
+  one_way_stress: 0.005       # 併記用
+
+tax:
+  rate: 0.20315
+
+universe:
+  common_stock_only: true
+  max_market_cap_jpy: 50000000000   # 500億円
+  min_avg_turnover_jpy: 30000000    # 3,000万円（過去20営業日平均）
+  turnover_window: 20
+  min_price_jpy: 50
+
+target:
+  horizon_days: 5
+
+validation:
+  gap_days: 5                 # 学習期間の終わりと評価期間の始まりの空白（営業日）
+  retrain_frequency: monthly
+
+market:
+  # 大引けの時刻（開示の利用開始日の判定に使う）
+  close_time_change_date: "2024-11-05"
+  close_time_before: "15:00"
+  close_time_after: "15:30"

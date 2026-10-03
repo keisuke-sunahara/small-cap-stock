@@ -1,0 +1,3 @@
+# 週次運用（ペーパートレード・実運用）で使うリリース。変更にはユーザーの承認が必要。
+production_release: null      # 例: release-v1
+shadow_releases: []           # 影の運用（最大2つ）

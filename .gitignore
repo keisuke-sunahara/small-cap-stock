@@ -1,0 +1,20 @@
+# 秘密情報（コミット禁止）
+.env
+.env.*
+!.env.example
+
+# データ・モデル（J-Quants利用規約により第三者が使用できる状態にしない。設定とコードから再現する）
+/data/
+/models/
+
+# 一時ファイル
+/tmp/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# ローカル設定
+.claude/settings.local.json

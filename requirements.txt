@@ -1,0 +1,12 @@
+# 直接使うライブラリ。動作確認した正確な版は requirements.lock.txt に記録している
+numpy
+pandas
+pyarrow
+pyyaml
+requests
+python-dotenv
+lightgbm
+scikit-learn
+scipy
+matplotlib
+pytest
