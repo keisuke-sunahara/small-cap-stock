@@ -3,6 +3,7 @@
 - APIキーは環境変数 JQUANTS_API_KEY（.env から読み込み）からのみ取得し、ログや例外メッセージに出さない
 - レート制限（プラン上限 × 安全率）を守るため、リクエストの間隔を空ける
 - 429 を受けたら即時の再試行はせず、公式の推奨どおり2分待ってから再試行する
+- 通信エラー・5xx は一時的な失敗として、少し待って数回まで再試行する（それ以外の 4xx は即座にエラー）
 - pagination_key によるページングをすべてたどる
 """
 from __future__ import annotations
@@ -18,6 +19,8 @@ from src.config import ROOT
 
 RETRY_WAIT_SEC_ON_429 = 120
 MAX_RETRIES_ON_429 = 3
+RETRY_WAIT_SEC_TRANSIENT = 30   # 通信エラー・5xx のとき
+MAX_RETRIES_TRANSIENT = 5
 
 
 class JQuantsError(RuntimeError):
@@ -66,19 +69,35 @@ class JQuantsClient:
 
     def _request(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url}/{path.lstrip('/')}"
-        for attempt in range(MAX_RETRIES_ON_429 + 1):
+        n_429 = n_transient = 0
+        while True:
             self._limiter.wait()
-            resp = self._session.get(url, params=params, headers={"x-api-key": self._api_key}, timeout=60)
+            try:
+                resp = self._session.get(url, params=params, headers={"x-api-key": self._api_key}, timeout=60)
+            except (requests.ConnectionError, requests.Timeout) as e:
+                # 通信の一時的な失敗。例外にはキーが含まれないが、型名だけを出す
+                n_transient += 1
+                if n_transient > MAX_RETRIES_TRANSIENT:
+                    raise JQuantsError(f"通信エラーが続いたため中止しました: {path} params={params}: "
+                                       f"{type(e).__name__}") from None
+                self._sleep(RETRY_WAIT_SEC_TRANSIENT)
+                continue
             if resp.status_code == 429:
-                if attempt == MAX_RETRIES_ON_429:
-                    break
+                n_429 += 1
+                if n_429 > MAX_RETRIES_ON_429:
+                    raise JQuantsError(f"429 が続いたため中止しました: {path} params={params}")
                 self._sleep(RETRY_WAIT_SEC_ON_429)
+                continue
+            if resp.status_code >= 500:
+                n_transient += 1
+                if n_transient > MAX_RETRIES_TRANSIENT:
+                    raise JQuantsError(f"HTTP {resp.status_code} が続いたため中止しました: {path} params={params}")
+                self._sleep(RETRY_WAIT_SEC_TRANSIENT)
                 continue
             if resp.status_code != 200:
                 # 本文にはキーが含まれないが、念のため先頭だけ出す
                 raise JQuantsError(f"HTTP {resp.status_code} {path} params={params}: {resp.text[:300]}")
             return resp.json()
-        raise JQuantsError(f"429 が続いたため中止しました: {path} params={params}")
 
     def get_all(self, path: str, **params: Any) -> list[dict[str, Any]]:
         """ページングをすべてたどって data 配列を連結して返す。"""

@@ -81,6 +81,24 @@ def test_get_all_follows_pagination_and_sends_api_key_header():
     assert DUMMY_API_KEY not in repr(client)
 
 
+def test_server_error_is_retried_but_client_error_is_not():
+    slept = []
+    session = DummySession([
+        DummyResponse(503, {}),
+        DummyResponse(200, {"data": [{"Code": "1"}]}),
+        DummyResponse(400, {"message": "bad"}),
+    ])
+    client = JQuantsClient("https://example.invalid/v2", 6000, api_key=DUMMY_API_KEY,
+                           session=session, sleep=slept.append)
+    assert client.get_all("/equities/master") == [{"Code": "1"}]
+    assert 30 in slept
+    import pytest
+    from src.data.jquants import JQuantsError
+    with pytest.raises(JQuantsError):
+        client.get_all("/equities/master")
+    assert len(session.calls) == 3
+
+
 def test_429_waits_before_retry():
     slept = []
     session = DummySession([

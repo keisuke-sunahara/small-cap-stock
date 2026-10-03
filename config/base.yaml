@@ -8,14 +8,16 @@ project:
 data:
   provider: jquants
   api_base_url: https://api.jquants.com/v2
-  plan: standard              # フェーズ1開始時に契約予定
+  plan: standard              # 2026-10-04 契約を確認
   rate_limit_per_min: 120     # Standardプランの上限
   rate_limit_safety: 0.8      # 上限の8割までに抑える
-  fins_rate_limit_per_min: 60 # /fins/summary は個別に60件/分
-  start_date: null            # フェーズ1で、契約プランで取得できる最古日に決める
-  # ホールドアウト（最終評価用）の開始日。フェーズ1で固定し、以後変更しない。
-  # この日以降のデータはフェーズ5まで読み込み・集計・グラフ化をしない。
-  holdout_start: null
+  fins_rate_limit_per_min: 60 # /fins/ 以下は個別に60件/分
+  # 取得の開始日。2026-10-04 時点の Standard の取得範囲（2016-10-04〜）の翌日（DECISIONS.md）
+  start_date: "2016-10-05"
+  # ホールドアウト（最終評価用）の開始日。2026-10-04 に固定。以後変更しない（DECISIONS.md）。
+  # この日以降のデータはフェーズ5まで取得・読み込み・集計・グラフ化をしない。
+  holdout_start: "2025-09-29"
+  raw_dir: data/raw/jquants
 
 backtest:
   # 過去の売買単位データが無いため、売買単位が100株に統一された2018-10-01以降に限定する（DECISIONS.md参照）
