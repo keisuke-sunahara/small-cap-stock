@@ -1,5 +1,6 @@
 """学習用データとウォークフォワードの分割のテスト（ダミーデータ）。"""
 import numpy as np
+import pandas as pd
 import pytest
 
 from src.backtest.target import forward_return
@@ -64,3 +65,19 @@ def test_panel_uses_only_data_up_to_t():
     cut = m.truncated(19)
     p_cut = daily_panel(cut, u[:20], {"f": f[:20]}, horizon=5)
     assert np.array_equal(p_full.t, p_cut.t) and np.allclose(p_full.X, p_cut.X, equal_nan=True)
+
+
+def test_walk_forward_rolling_window_years():
+    """直近 window_years 年のローリング：学習の最初の起点は、評価の月の最初の予測日の window_years 年前以降。"""
+    dates = np.array([d.date().isoformat() for d in pd.bdate_range("2019-01-01", "2024-12-31")])
+    expanding = walk_forward_splits(dates, "2019-01-01", "2024-03-01", "2024-06-30", gap=5, horizon=5)
+    rolling = walk_forward_splits(dates, "2019-01-01", "2024-03-01", "2024-06-30", gap=5, horizon=5, window_years=4)
+    for e, r in zip(expanding, rolling):
+        assert dates[e.train_t[0]] == "2019-01-01"
+        e0 = str(dates[r.eval_preds[0]])
+        lower = (pd.Timestamp(e0) - pd.DateOffset(years=4)).date().isoformat()
+        assert dates[r.train_t[0]] >= lower and dates[r.train_t[0] - 1] < lower
+        assert r.train_t[-1] == e.train_t[-1]               # 終わり（空白の前）は同じ
+    # 学習の開始日から4年たつまでは、拡大窓と同じ
+    early = walk_forward_splits(dates, "2019-01-01", "2020-03-01", "2020-04-30", gap=5, horizon=5, window_years=4)
+    assert all(dates[s.train_t[0]] == "2019-01-01" for s in early)

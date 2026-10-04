@@ -13,6 +13,8 @@
 - 評価期間を暦の月ごとに区切り、月ごとに学習し直す（retrain_frequency: monthly）
 - 評価の予測日は、その月に入る週の予測日（前の週の最終営業日）
 - 学習に使う起点 t は、学習の開始日以降で、t ≤ e0 − gap − 1（e0 = その月の最初の予測日の位置）。
+  window_years があれば、さらに e0 の日付の window_years 年前（暦）以降に限る（直近4年のローリング。
+  2026-10-04 承認の PLAN.md。運用時に Light の5年分のデータで同じ再学習ができるようにするため）
   t の目的変数は t+horizon の終値で決まるので、gap ≥ horizon なら e0 の時点で答えが分かっているものだけを使う。
   さらに「学習期間の終わりと評価期間の始まりの間に gap 営業日以上の空白」（CLAUDE.md）を満たす
 """
@@ -81,7 +83,7 @@ class Split:
 
 
 def walk_forward_splits(dates: np.ndarray, train_start: str, eval_start: str, eval_end: str,
-                        gap: int, horizon: int) -> list[Split]:
+                        gap: int, horizon: int, window_years: int | None = None) -> list[Split]:
     """eval_start〜eval_end に最初の営業日がある週の予測日を、月ごとにまとめて分割する。"""
     if gap < horizon:
         raise ValueError(f"gap（{gap}）は目的変数の期間（{horizon}）以上にする")
@@ -95,7 +97,11 @@ def walk_forward_splits(dates: np.ndarray, train_start: str, eval_start: str, ev
     for month, preds in sorted(by_month.items()):
         e0 = min(preds)
         last = e0 - gap - 1
-        out.append(Split(month=month, train_t=np.arange(t0, last + 1), eval_preds=np.array(sorted(preds))))
+        first = t0
+        if window_years is not None:
+            lower = (pd.Timestamp(str(dates[e0])) - pd.DateOffset(years=window_years)).date().isoformat()
+            first = max(t0, int(np.searchsorted(dates, lower)))
+        out.append(Split(month=month, train_t=np.arange(first, last + 1), eval_preds=np.array(sorted(preds))))
     return out
 
 

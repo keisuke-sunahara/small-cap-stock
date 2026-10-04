@@ -73,7 +73,10 @@ validation:
   retrain_frequency: monthly
   # 学習に使う最初の起点（60営業日の特徴量がそろう時期。前年同期比は2017年10月ごろから。DECISIONS.md）
   train_start: "2017-01-01"
-  train_window: expanding     # 学習期間は train_start から評価の前まで（月ごとに伸ばす）
+  # 学習期間は直近4年のローリング（評価の月の最初の予測日の4年前〜空白の前まで。2026-10-04 承認、PLAN.md）。
+  # 2026-10-04 まで expanding（拡大窓）と書かれていたのを、承認どおりに直した（フェーズ4は未実行）
+  train_window: rolling
+  train_window_years: 4
 
 features:
   set: all_v1                 # src/features/registry.py の FEATURE_SETS
