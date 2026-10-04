@@ -29,8 +29,8 @@ from src.data.fetch import business_days, raw_dir
 from src.data.load import read_raw
 
 JST = ZoneInfo("Asia/Tokyo")
-CACHE_VERSION = "v2"   # v2：margin_other を追加（2026-10-04）
-ARRAYS = ["O", "H", "L", "C", "Va", "adj", "UL", "LL", "common", "shares_base", "margin_other"]
+CACHE_VERSION = "v3"   # v2：margin_other を追加、v3：Vo を追加（2026-10-04。ほかの配列は v1 と同じ）
+ARRAYS = ["O", "H", "L", "C", "Va", "Vo", "adj", "UL", "LL", "common", "shares_base", "margin_other"]
 
 
 @dataclass
@@ -42,6 +42,7 @@ class Market:
     L: np.ndarray
     C: np.ndarray
     Va: np.ndarray             # 売買代金（売買不成立は 0、上場していない日は NaN）
+    Vo: np.ndarray             # 出来高（調整前。売買不成立は 0、上場していない日は NaN）
     adj: np.ndarray            # 調整係数（その日の朝に効く分割・併合。無ければ 1）
     UL: np.ndarray             # ストップ高のフラグ（bool）
     LL: np.ndarray             # ストップ安のフラグ（bool）
@@ -77,6 +78,11 @@ class Market:
     def C_ff(self) -> np.ndarray:
         """調整前の終値を直前の約定で埋めたもの（評価額の計算用。分割は株数の側で直す）。"""
         return pd.DataFrame(self.C).ffill().to_numpy()
+
+    @property
+    def Vq(self) -> np.ndarray:
+        """分割調整した出来高（Qc と同じ基準。出来高 × cumF）。"""
+        return self.Vo * self.cumF
 
     @property
     def shares(self) -> np.ndarray:
@@ -128,7 +134,7 @@ def build_market(cfg: dict) -> Market:
     last_listed = np.full(N, -1, dtype=np.int64)
     np.maximum.at(last_listed, mj, mi)
 
-    bars = read_raw(cfg, "bars", columns=["Code", "O", "H", "L", "C", "Va", "UL", "LL", "AdjFactor"])
+    bars = read_raw(cfg, "bars", columns=["Code", "O", "H", "L", "C", "Va", "Vo", "UL", "LL", "AdjFactor"])
     bars["Code"] = bars["Code"].astype(str)
     bars = bars[bars["Code"].isin(ci)]
     bi = bars["Date"].map(di).to_numpy()
@@ -140,6 +146,8 @@ def build_market(cfg: dict) -> Market:
         arr[col] = a
     va = np.full((T, N), np.nan)
     va[bi, bj] = bars["Va"].fillna(0.0).to_numpy(dtype=float)  # 売買不成立の日は売買代金0
+    vo = np.full((T, N), np.nan)
+    vo[bi, bj] = bars["Vo"].fillna(0.0).to_numpy(dtype=float)
     adj = np.ones((T, N))
     adj[bi, bj] = bars["AdjFactor"].fillna(1.0).to_numpy(dtype=float)
     ul = np.zeros((T, N), dtype=bool)
@@ -171,7 +179,7 @@ def build_market(cfg: dict) -> Market:
             "data_latest_fetch_jst": _latest_fetch(cfg), "period": [bdays[0], bdays[-1]],
             "cache_version": CACHE_VERSION}
     return Market(dates=np.array(bdays), codes=codes, O=arr["O"], H=arr["H"], L=arr["L"], C=arr["C"],
-                  Va=va, adj=adj, UL=ul, LL=ll, common=common, shares_base=shares_base,
+                  Va=va, Vo=vo, adj=adj, UL=ul, LL=ll, common=common, shares_base=shares_base,
                   last_listed=last_listed, topix=topix, margin_other=margin_other, meta=meta)
 
 

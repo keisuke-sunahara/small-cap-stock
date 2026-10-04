@@ -22,7 +22,8 @@ def dummy_market(dates: np.ndarray, close: dict[str, list[float]], open_: dict[s
     H = np.fmax(O, C)
     L = np.fmin(O, C)
     Va = np.where(np.isnan(C), 0.0, va)
-    return Market(dates=dates, codes=codes, O=O, H=H, L=L, C=C, Va=Va, adj=np.ones((T, N)),
+    Vo = np.where(np.isnan(C), 0.0, va / np.nan_to_num(C, nan=1.0))
+    return Market(dates=dates, codes=codes, O=O, H=H, L=L, C=C, Va=Va, Vo=Vo, adj=np.ones((T, N)),
                   UL=np.zeros((T, N), bool), LL=np.zeros((T, N), bool), common=np.ones((T, N), bool),
                   shares_base=np.full((T, N), shares), last_listed=np.full(N, T - 1),
                   topix=np.full(T, 1000.0))
