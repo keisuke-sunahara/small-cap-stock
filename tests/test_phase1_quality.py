@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from src.analysis.phase1_quality import adjusted_returns, is_common
+from src.analysis.phase1_quality import adjusted_returns, factor_event_returns, is_common
 
 
 def test_adjusted_returns_remove_split_jump_and_skip_no_trade_days():
@@ -33,3 +33,21 @@ def test_is_common():
                       "ProdCat": ["011", "011", "014", "011", "011"],
                       "Mkt": ["0111", "0112", "0111", "0105", "0113"]})
     assert is_common(m).tolist() == [True, False, False, False, True]
+
+
+def test_factor_event_returns_include_no_trade_days():
+    # ダミー：11110 は売買不成立の日に正しい2分割。22220 は売買不成立の日に係数0.1が付いたが株価は変わらない（誤った係数）
+    bars = pd.DataFrame({
+        "Date": ["2024-01-04", "2024-01-05", "2024-01-09", "2024-01-10"] * 2,
+        "Code": ["11110"] * 4 + ["22220"] * 4,
+        "C": [1000.0, 1100.0, np.nan, 560.0, 300.0, 300.0, np.nan, 300.0],
+        "AdjFactor": [1.0, 1.0, 0.5, 1.0, 1.0, 1.0, 0.1, 1.0],
+    })
+    master = pd.DataFrame({"Date": ["2024-01-09", "2024-01-09"], "Code": ["11110", "22220"],
+                           "ProdCat": ["011", "011"], "Mkt": ["0111", "0105"]})
+    fe = factor_event_returns(bars, master).set_index("Code")
+    assert fe["no_trade_day"].all()
+    assert (fe["next_traded"] == "2024-01-10").all()
+    assert np.isclose(fe.loc["11110", "ret_adj"], 1120 / 1100 - 1)
+    assert np.isclose(fe.loc["22220", "ret_adj"], 9.0)          # 300円 → 調整後3,000円相当
+    assert fe["is_common"].tolist() == [True, False]

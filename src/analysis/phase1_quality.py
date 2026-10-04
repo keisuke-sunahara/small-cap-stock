@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 COMMON_PRODCAT = "011"
 COMMON_MKT = {"0101", "0102", "0104", "0106", "0107", "0111", "0112", "0113"}
 EXTREME_RET = 0.5
+FACTOR_DAY_RET = 0.3   # 調整係数のある日をまたぐ調整後リターンの点検の閾値
 
 
 def is_common(master: pd.DataFrame) -> pd.Series:
@@ -98,6 +99,26 @@ def adjusted_returns(bars: pd.DataFrame) -> pd.DataFrame:
     return traded
 
 
+def factor_event_returns(bars: pd.DataFrame, master: pd.DataFrame) -> pd.DataFrame:
+    """調整係数（AdjFactor ≠ 1）のある日ごとに、その日をまたぐ調整後リターンを出す。売買不成立の日の係数も含める。
+
+    係数のある日 d について、d 以降で最初に売買が成立した日の ret_adj（その前に売買が成立した日の終値から）を使う。
+    同じ売買不成立の期間に係数が複数あれば、どれも同じリターンになる。is_common は d の銘柄一覧で判定する。
+    """
+    traded = adjusted_returns(bars)[["Date", "Code", "C", "ret_raw", "ret_adj"]]
+    ev = bars.loc[bars["AdjFactor"].notna() & (bars["AdjFactor"] != 1.0), ["Date", "Code", "C", "AdjFactor"]].copy()
+    ev["no_trade_day"] = ev["C"].isna()
+    ev = ev.drop(columns="C").sort_values("Date")
+    tr = traded.rename(columns={"Date": "next_traded"}).sort_values("next_traded")
+    ev["_d"] = pd.to_datetime(ev["Date"])
+    tr["_d"] = pd.to_datetime(tr["next_traded"])
+    out = pd.merge_asof(ev, tr, on="_d", by="Code", direction="forward").drop(columns="_d")
+    cm = master.loc[is_common(master), ["Date", "Code"]].assign(is_common=True)
+    out = out.merge(cm, on=["Date", "Code"], how="left")
+    out["is_common"] = out["is_common"].eq(True)
+    return out.sort_values(["Code", "Date"]).reset_index(drop=True)
+
+
 def check_bars(bars: pd.DataFrame, master: pd.DataFrame, bdays: list[str]) -> tuple[dict, pd.DataFrame]:
     res: dict = {}
     per_day = bars.groupby("Date").agg(rows=("Code", "size"), no_trade=("C", lambda s: int(s.isna().sum())))
@@ -148,6 +169,20 @@ def check_bars(bars: pd.DataFrame, master: pd.DataFrame, bdays: list[str]) -> tu
         "abs_raw_return_median": round(float(on_event["ret_raw"].abs().median()), 4) if len(on_event) else None,
         "abs_adj_return_median": round(float(on_event["ret_adj"].abs().median()), 4) if len(on_event) else None,
         "adj_return_over_50pct": int((on_event["ret_adj"].abs() > EXTREME_RET).sum()),
+    }
+    # 売買不成立の日の係数も含めて、係数のある日をまたぐ調整後リターンが ±30% を超えるもの（評価役の指摘）
+    fe = factor_event_returns(bars, master)
+    big = fe[fe["ret_adj"].abs() > FACTOR_DAY_RET]
+    names = master.drop_duplicates("Code", keep="last").set_index("Code")
+    res["factor_days_adj_return_over_30pct"] = {
+        "events": len(fe), "events_on_no_trade_days": int(fe["no_trade_day"].sum()),
+        "events_without_later_trade": int(fe["ret_adj"].isna().sum()),
+        "over_30pct_all": len(big), "over_30pct_common": int(big["is_common"].sum()),
+        "list": [{"Code": r.Code, "CoName": names["CoName"].get(r.Code, ""), "MktNm": names["MktNm"].get(r.Code, ""),
+                  "date": r.Date, "AdjFactor": float(r.AdjFactor), "no_trade_day": bool(r.no_trade_day),
+                  "next_traded": r.next_traded, "ret_raw": round(float(r.ret_raw), 4),
+                  "ret_adj": round(float(r.ret_adj), 4), "is_common": bool(r.is_common)}
+                 for r in big.itertuples()],
     }
     r = traded["ret_adj"].dropna()
     ext = traded[traded["ret_adj"].abs() > EXTREME_RET]
@@ -203,7 +238,7 @@ def check_topix(topix: pd.DataFrame, bdays: list[str]) -> dict:
             "null_close": int(t["C"].isna().sum())}
 
 
-def check_summary(s: pd.DataFrame, master: pd.DataFrame) -> dict:
+def check_summary(s: pd.DataFrame, master: pd.DataFrame, bdays: list[str]) -> dict:
     res: dict = {"rows": len(s), "rows_per_year": s["DiscDate"].str[:4].value_counts().sort_index().to_dict()}
     res["DocType_top"] = s["DocType"].value_counts().head(15).to_dict()
     res["DocType_kinds"] = int(s["DocType"].nunique())
@@ -216,7 +251,15 @@ def check_summary(s: pd.DataFrame, master: pd.DataFrame) -> dict:
         "15:30_or_later": round(float((hhmm >= "15:30").mean()), 4),
     }
     res["duplicate_DiscNo"] = int(s["DiscNo"].duplicated().sum())
-    res["dates_with_weekend_disclosure"] = int(pd.to_datetime(s["DiscDate"]).dt.dayofweek.ge(5).sum())
+    # 営業日以外（土日・祝日・年末年始）の開示。件数（rows）と日数（days）を分けて出す
+    # （以前の dates_with_weekend_disclosure は中身が土日の件数だったため、名前をそろえた）
+    weekend = pd.to_datetime(s["DiscDate"]).dt.dayofweek.ge(5)
+    nonbday = ~s["DiscDate"].isin(set(bdays))
+    res["weekend_disclosure_rows"] = int(weekend.sum())
+    res["weekend_disclosure_days"] = int(s.loc[weekend, "DiscDate"].nunique())
+    res["nonbusiness_day_disclosure_rows"] = int(nonbday.sum())
+    res["nonbusiness_day_disclosure_days"] = int(s.loc[nonbday, "DiscDate"].nunique())
+    res["nonbusiness_weekday_disclosure_dates"] = sorted(s.loc[nonbday & ~weekend, "DiscDate"].unique().tolist())
     # 時価総額の計算に使う発行済株式数（ShOutFY）の空欄の割合（決算短信のみ）
     fin = s[s["DocType"].astype(str).str.contains("FinancialStatements")]
     res["ShOutFY_blank_ratio_in_FinancialStatements"] = round(float(
@@ -287,7 +330,7 @@ def main() -> None:
 
     report["topix"] = check_topix(read_raw(cfg, "topix"), bdays)
     summary = read_raw(cfg, "summary", columns=["Code", "DiscTime", "DiscNo", "DocType", "ShOutFY"])
-    report["summary"] = check_summary(summary, master)
+    report["summary"] = check_summary(summary, master, bdays)
     edate = read_raw(cfg, "earnings_date", columns=["Code", "SchDate", "FQName"])
     report["earnings_date"] = check_earnings_date(edate, master)
 

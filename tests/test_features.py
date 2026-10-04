@@ -220,3 +220,34 @@ def test_no_future_information_dummy():
         # 予測日の当日の大引け以降の開示が、p の値に効いていないこと（p の行は p の翌日の開示を加えても同じ）
         late = copy.deepcopy(rows) + [fin_row(codes[0], dates[p], "15:30", Eq=9e9)]
         assert np.allclose(feat("bp", make_fd(m, late))[: p + 1], feat("bp", full)[: p + 1], equal_nan=True)
+
+
+def test_nonbusiness_day_disclosure_is_not_used_for_friday_prediction():
+    """土日・祝日の開示は、次の営業日の引け後の予測から使う。週末に計算しても、金曜の予測には使わない。
+
+    2024-11-01（金）の次の営業日は 11/5（火）（11/4 は祝日）。週末（11/3 の夜など）に計算するときは、
+    株価は金曜まで、開示は土日・祝日の分まで手元にある状態になる。
+    """
+    dates = dummy_dates("2024-10-28", 15, holidays=("2024-11-04",))
+    i = {d: k for k, d in enumerate(dates)}
+    fri, tue = i["2024-11-01"], i["2024-11-05"]
+    codes = ["11110", "22220", "33330", "44440", "55550"]
+    m = dummy_market(dates, {c: [1000.0] * 15 for c in codes}, shares=1e6)   # 時価総額 10億円
+    rows = [fin_row(c, "2024-10-29", "10:00", Eq=1e8) for c in codes]       # 先に使える開示（PBR の元）
+    rows += [fin_row("11110", "2024-11-02", "10:00", Eq=5e8, no="sat"),       # 土曜（大引けの前の時刻でも）
+             fin_row("22220", "2024-11-03", "09:00", Eq=5e8, no="sun"),       # 日曜
+             fin_row("33330", "2024-11-04", "10:00", Eq=5e8, no="hol"),       # 祝日（月曜）
+             fin_row("44440", "2024-11-01", "18:00", Eq=5e8, no="fri"),       # 金曜の大引け後（比較用）
+             fin_row("55550", "2024-11-01", "14:00", Eq=5e8, no="fri2")]      # 金曜の大引け前 → 金曜から使う
+    expect_fri = [1e8 / 1e9] * 4 + [5e8 / 1e9]
+    # 1. 全期間のデータで計算した場合
+    b = feat("bp", make_fd(m, rows))
+    assert np.allclose(b[fri], expect_fri)
+    assert np.allclose(b[tue], 5e8 / 1e9)
+    # 2. 週末に計算した場合（株価は金曜まで、開示は祝日の分まである）
+    b_wk = feat("bp", make_fd(m.truncated(fri), rows))
+    assert b_wk.shape[0] == fri + 1
+    assert np.allclose(b_wk[fri], expect_fri)
+    # 3. 金曜までの値は、土日・祝日・金曜の大引け後の開示を除いた場合と同じ
+    before = [r for r in rows if r["DiscNo"] not in ("sat", "sun", "hol", "fri")]
+    assert np.allclose(b_wk, feat("bp", make_fd(m.truncated(fri), before)), equal_nan=True)

@@ -3,6 +3,10 @@
 - 日付で取ったデータ（1日1ファイル）は、ファイル名の日付で絞ってから読む
 - 期間で取ったデータ（calendar・topix）は、読んだ後に Date で絞る
 - ホールドアウト開始日以降を含む指定は、allow_holdout=True（フェーズ5でユーザーの承認後のみ）でなければ拒否する
+- 株価（bars）の Adj* 列（AdjO・AdjH・AdjL・AdjC・AdjVo）と MktCap 列は読み込まない（評価役の指摘、DECISIONS.md）。
+  Adj* は取得日までの分割を反映して後から計算し直された値で、AdjC ÷ C からホールドアウト期間の分割が分かってしまう。
+  MktCap は計算に使った株式数の時点が未確認のため使わない（時価総額は開示済みの株式数から自分で計算する）。
+  分割の調整は、その日の調整係数 AdjFactor の累積積で行う（src/backtest/market.py）
 """
 from __future__ import annotations
 
@@ -17,6 +21,8 @@ from src.data.fetch import DATASETS, HoldoutError
 
 DATE_COLUMN = {"calendar": "Date", "topix": "Date", "master": "Date", "bars": "Date",
                "summary": "DiscDate", "earnings_date": "PubDate"}
+# 読み込まない列（指定されたらエラー。columns=None でも読まない）
+EXCLUDED_COLUMNS = {"bars": ("AdjO", "AdjH", "AdjL", "AdjC", "AdjVo", "MktCap")}
 
 
 def _holdout_start(cfg: dict) -> str:
@@ -42,12 +48,16 @@ def read_raw(cfg: dict, dataset: str, start: str | None = None, end: str | None 
                        if (start is None or p.stem >= start) and p.stem <= end)
     if not files:
         return pd.DataFrame(columns=columns or [date_col])
+    excluded = set(EXCLUDED_COLUMNS.get(dataset, ()))
+    if columns is not None and excluded & set(columns):
+        raise ValueError(f"{dataset} の列 {sorted(excluded & set(columns))} は読み込めません（未来の分割の情報を含むため）")
     if columns is not None and date_col not in columns:
         columns = [date_col, *columns]
     frames = []
     for f in files:
         if columns is None:
-            df = pd.read_parquet(f)
+            names = pq.read_schema(f).names
+            df = pd.read_parquet(f, columns=[c for c in names if c not in excluded])
         else:
             # 日によっては列が無いことがある（0件の日など）。ある列だけ読み、無い列は欠損にする
             present = set(pq.read_schema(f).names)

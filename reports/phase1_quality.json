@@ -424,6 +424,99 @@
       "abs_adj_return_median": 0.0193,
       "adj_return_over_50pct": 0
     },
+    "factor_days_adj_return_over_30pct": {
+      "events": 2149,
+      "events_on_no_trade_days": 42,
+      "events_without_later_trade": 10,
+      "over_30pct_all": 7,
+      "over_30pct_common": 4,
+      "list": [
+        {
+          "Code": "32440",
+          "CoName": "サムティ",
+          "MktNm": "プライム",
+          "date": "2018-09-26",
+          "AdjFactor": 0.6714046822742475,
+          "no_trade_day": false,
+          "next_traded": "2018-09-26",
+          "ret_raw": -0.0635,
+          "ret_adj": 0.3948,
+          "is_common": true
+        },
+        {
+          "Code": "44260",
+          "CoName": "パスロジ",
+          "MktNm": "TOKYO PRO MARKET",
+          "date": "2021-10-01",
+          "AdjFactor": 0.5,
+          "no_trade_day": true,
+          "next_traded": "2024-05-27",
+          "ret_raw": -0.674,
+          "ret_adj": -0.348,
+          "is_common": false
+        },
+        {
+          "Code": "62280",
+          "CoName": "ジェイ・イー・ティ",
+          "MktNm": "スタンダード",
+          "date": "2022-12-29",
+          "AdjFactor": 0.5,
+          "no_trade_day": true,
+          "next_traded": "2023-09-25",
+          "ret_raw": -0.2904,
+          "ret_adj": 0.4193,
+          "is_common": false
+        },
+        {
+          "Code": "67310",
+          "CoName": "ピクセラ",
+          "MktNm": "スタンダード",
+          "date": "2023-12-27",
+          "AdjFactor": 100.0,
+          "no_trade_day": true,
+          "next_traded": "2023-12-29",
+          "ret_raw": 149.0,
+          "ret_adj": 0.5,
+          "is_common": true
+        },
+        {
+          "Code": "71760",
+          "CoName": "シンプレクス・ファイナンシャル・ホールディングス",
+          "MktNm": "TOKYO PRO MARKET",
+          "date": "2019-09-27",
+          "AdjFactor": 0.1,
+          "no_trade_day": true,
+          "next_traded": "2020-02-10",
+          "ret_raw": 0.0563,
+          "ret_adj": 9.5634,
+          "is_common": false
+        },
+        {
+          "Code": "87370",
+          "CoName": "あかつき本社",
+          "MktNm": "スタンダード",
+          "date": "2017-05-18",
+          "AdjFactor": 0.7119718309859155,
+          "no_trade_day": false,
+          "next_traded": "2017-05-18",
+          "ret_raw": -0.0085,
+          "ret_adj": 0.3927,
+          "is_common": true
+        },
+        {
+          "Code": "87370",
+          "CoName": "あかつき本社",
+          "MktNm": "スタンダード",
+          "date": "2018-07-23",
+          "AdjFactor": 0.6030927835051546,
+          "no_trade_day": false,
+          "next_traded": "2018-07-23",
+          "ret_raw": -0.132,
+          "ret_adj": 0.4393,
+          "is_common": true
+        }
+      ]
+    },
     "adjusted_daily_returns": {
       "n": 8726615,
       "abs_over_50pct": 249,
@@ -532,7 +625,22 @@
       "15:30_or_later": 0.4065
     },
     "duplicate_DiscNo": 0,
-    "dates_with_weekend_disclosure": 31,
+    "weekend_disclosure_rows": 31,
+    "weekend_disclosure_days": 23,
+    "nonbusiness_day_disclosure_rows": 43,
+    "nonbusiness_day_disclosure_days": 33,
+    "nonbusiness_weekday_disclosure_dates": [
+      "2017-08-11",
+      "2018-02-12",
+      "2019-04-30",
+      "2020-03-20",
+      "2021-02-11",
+      "2022-02-11",
+      "2022-04-29",
+      "2022-05-04",
+      "2023-08-11",
+      "2023-11-03"
+    ],
     "ShOutFY_blank_ratio_in_FinancialStatements": 0.0013,
     "common_with_statement_in_last_365d": 0.9989
   },
