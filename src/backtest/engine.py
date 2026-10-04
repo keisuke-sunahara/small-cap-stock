@@ -26,6 +26,13 @@
   引成の注文を dk の 11:30〜15:00 に入れる前に判断できる（暫定の初期値。DECISIONS.md）
 - "same_day"：dk の引け後の順位で判断する。基本ルールの文面どおりだが、引けで売るかを引け値を見て決めることになり
   実際には発注できない（参考値）
+- 判断に使う予算（基本ルール）の総資産は、判断する日 c の終値と c の時点の株数で計算する。dk の朝に分割・併合が
+  効いた保有銘柄は、株数を c の時点に戻して評価する（評価役のフェーズ2の指摘3）
+
+コスト（cost_model）
+- "flat"：片道 cost を一律に差し引く（基本ルール。手数料0円＋自分の注文による寄付・引けの値動き。DECISIONS.md）
+- "tick"：片道 = max(cost, 1呼値 ÷ 約定価格)。安い株ほど1呼値の値動きの割合が大きいことを反映する
+  （評価役のフェーズ2の指摘1。フェーズ4の比較では flat と併記する）
 """
 from __future__ import annotations
 
@@ -36,13 +43,14 @@ import numpy as np
 import pandas as pd
 
 from src.backtest.execution import (buy_filled, close_sell_filled, limit_price, open_sell_filled,
-                                    order_shares, within_turnover_cap)
+                                    order_shares, tick_size, within_turnover_cap)
 from src.backtest.market import Market
 from src.backtest.target import Week, make_weeks
 
 ScoreFn = Callable[[int], np.ndarray]   # 日付の位置 → 銘柄ごとの点数（大きいほど上位。NaN は対象外）
 CONTINUATION_MODES = ("none", "prev_day", "same_day")
 BUDGET_MODES = ("min_equity", "fixed")
+COST_MODELS = ("flat", "tick")
 
 
 @dataclass
@@ -55,6 +63,7 @@ class Rules:
     cost: float
     continuation: str = "prev_day"
     budget_mode: str = "min_equity"
+    cost_model: str = "flat"
 
     @classmethod
     def from_config(cls, cfg: dict, **override) -> "Rules":
@@ -62,13 +71,22 @@ class Rules:
                   limit_up_pct=cfg["order"]["limit_up_pct"], lot=cfg["order"]["lot_size"],
                   max_order_to_adv=cfg["order"]["max_order_to_adv"], cost=cfg["cost"]["one_way"],
                   continuation=cfg["backtest"].get("continuation", "prev_day"),
-                  budget_mode=cfg["backtest"].get("budget_mode", "min_equity"))
+                  budget_mode=cfg["backtest"].get("budget_mode", "min_equity"),
+                  cost_model=cfg["cost"].get("model", "flat"))
         kw.update(override)
         if kw["continuation"] not in CONTINUATION_MODES:
             raise ValueError(f"continuation は {CONTINUATION_MODES} のどれか: {kw['continuation']}")
         if kw["budget_mode"] not in BUDGET_MODES:
             raise ValueError(f"budget_mode は {BUDGET_MODES} のどれか: {kw['budget_mode']}")
+        if kw["cost_model"] not in COST_MODELS:
+            raise ValueError(f"cost_model は {COST_MODELS} のどれか: {kw['cost_model']}")
         return cls(**kw)
+
+    def cost_rate(self, price: float) -> float:
+        """片道のコストの割合（price は約定価格）。"""
+        if self.cost_model == "tick" and price > 0:
+            return max(self.cost, tick_size(price) / price)
+        return self.cost
 
 
 @dataclass
@@ -134,7 +152,7 @@ class Backtester:
             shares, lim = self._affordable(t, j, budget)
             if shares == 0:
                 continue
-            need = shares * lim * (1 + self.r.cost)
+            need = shares * lim * (1 + self.r.cost_rate(lim))
             if need > remaining:
                 continue
             remaining -= need
@@ -158,12 +176,24 @@ class Backtester:
         trades: list[tuple] = []
         order_rows: list[dict] = []
         week_rows: list[dict] = []
+        flow = {"traded": 0.0, "cost": 0.0}   # その週の売買代金とコスト（損益分岐のコストの計算用）
 
-        def value(t: int) -> float:
+        def value(t: int, now: int | None = None) -> float:
+            """t の終値での総資産。now（≥ t）を渡すと、now の朝までに効いた分割・併合を戻して t の時点の株数で評価する。"""
             v = cash
             for j, sh in list(pos.items()) + list(pending.items()):
+                if now is not None and now != t:
+                    sh = sh * m.cumF[now, j] / m.cumF[t, j]
                 v += sh * self.C_ff[t, j]
             return v
+
+        def trade(t: int, j: int, side: str, sh: float, px: float, reason: str) -> float:
+            """売買を記録し、現金の増減（コスト込み）を返す。"""
+            c = r.cost_rate(px)
+            flow["traded"] += sh * px
+            flow["cost"] += sh * px * c
+            trades.append((m.dates[t], j, side, sh, px, reason))
+            return -sh * px * (1 + c) if side == "buy" else sh * px * (1 - c)
 
         equity[weeks[0].pred] = cash
         for w in weeks:
@@ -189,14 +219,12 @@ class Backtester:
                     for j in [j for j in book if m.last_listed[j] < t]:
                         px = self.C_ff[m.last_listed[j], j]
                         sh = book.pop(j)
-                        cash += sh * px * (1 - r.cost)
-                        trades.append((m.dates[t], j, "sell", sh, px, "delisted"))
+                        cash += trade(t, j, "sell", sh, px, "delisted")
                 # 寄付：売れ残りの売り
                 for j in list(pending):
                     if open_sell_filled(m.O[t, j]):
                         sh = pending.pop(j)
-                        cash += sh * m.O[t, j] * (1 - r.cost)
-                        trades.append((m.dates[t], j, "sell", sh, m.O[t, j], "open_retry"))
+                        cash += trade(t, j, "sell", sh, m.O[t, j], "open_retry")
                 # 寄付：買い
                 if t == w.first:
                     for o in orders:
@@ -206,10 +234,9 @@ class Backtester:
                                            "rank": o["rank"], "shares": o["shares"], "limit": o["limit"],
                                            "open": m.O[t, j], "filled": ok})
                         if ok:
-                            cash -= o["shares"] * m.O[t, j] * (1 + r.cost)
+                            cash += trade(t, j, "buy", float(o["shares"]), m.O[t, j], "open_limit")
                             pos[j] = float(o["shares"])
                             n_filled += 1
-                            trades.append((m.dates[t], j, "buy", float(o["shares"]), m.O[t, j], "open_limit"))
                     invested_after_open = len(pos) > 0
                 # 大引け：継続保有の判断と引成の売り
                 if t == w.last and pos:
@@ -218,20 +245,21 @@ class Backtester:
                         kept: set[int] = set()
                     else:
                         c = t - 1 if r.continuation == "prev_day" else t
-                        b = r.capital if r.budget_mode == "fixed" else min(r.capital, value(c))
+                        b = r.capital if r.budget_mode == "fixed" else min(r.capital, value(c, now=t))
                         kept = self.kept_positions(c, held, score_fn, b / r.n_holdings)
                     for j in held - kept:
                         sh = pos.pop(j)
                         if close_sell_filled(m.C[t, j], m.L[t, j], bool(m.LL[t, j])):
-                            cash += sh * m.C[t, j] * (1 - r.cost)
-                            trades.append((m.dates[t], j, "sell", sh, m.C[t, j], "close"))
+                            cash += trade(t, j, "sell", sh, m.C[t, j], "close")
                         else:
                             pending[j] = sh
                 equity[t] = value(t)
             week_rows.append({"first": m.dates[w.first], "last": m.dates[w.last], "n_days": len(w.days),
                               "equity": equity[w.last], "n_orders": len(orders), "n_filled": n_filled,
                               "invested": invested_after_open, "n_held_end": len(pos),
-                              "n_pending_end": len(pending)})
+                              "n_pending_end": len(pending), "traded_value": flow["traded"],
+                              "cost_paid": flow["cost"]})
+            flow["traded"] = flow["cost"] = 0.0
         weekly = pd.DataFrame(week_rows)
         prev = np.concatenate([[equity[weeks[0].pred]], weekly["equity"].to_numpy()[:-1]])
         if r.budget_mode == "fixed":

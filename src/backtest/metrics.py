@@ -101,3 +101,36 @@ def weekly_rank_ic(scores: np.ndarray, realized: np.ndarray, universe_rows: np.n
         if ok.sum() >= 10:
             out[k] = stats.spearmanr(scores[k][ok], realized[k][ok]).statistic
     return out
+
+
+def breakeven_one_way_cost(weekly: pd.DataFrame, capital: float, bench_ret: pd.Series | None, *,
+                           start_pred: str, lo: float = -0.05, hi: float = 0.10) -> float | None:
+    """損益分岐の片道コスト（一律）：これ以下のコストなら、年率の超過リターン（bench_ret が None なら年率リターン）が
+    プラスになる値。
+
+    予算固定（budget_mode="fixed"）の結果に使う。予算固定では注文がコストによらないため、
+    週次リターン(c) = (その週の損益 + 払ったコスト − c × 売買代金) ÷ 運用資金 と書ける（engine の weekly の
+    traded_value・cost_paid を使う）。lo（−5%）でもマイナスなら None（コストが0でも、マイナスのコストでも届かない）、
+    hi（10%）でもプラスなら hi を返す。
+    """
+    pnl = weekly["ret"].to_numpy() * capital + weekly["cost_paid"].to_numpy()
+    traded = weekly["traded_value"].to_numpy()
+    last = weekly["last"].iloc[-1]
+    base = 0.0 if bench_ret is None else annualized(bench_ret.reset_index(drop=True), start_pred, last)
+
+    def f(c: float) -> float:
+        r = pd.Series((pnl - c * traded) / capital)
+        a = annualized(r, start_pred, last)
+        return (a if a == a else -1.0) - base
+
+    if f(lo) <= 0:
+        return None
+    if f(hi) >= 0:
+        return hi
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if f(mid) > 0:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2

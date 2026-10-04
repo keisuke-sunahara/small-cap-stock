@@ -7,8 +7,12 @@
 - 上場廃止の集計（ユーザーの依頼、2026-10-04）：選ばれた（注文を出した）銘柄のうち、予測日から30営業日以内に
   上場廃止になった割合。判断材料にだけ使い、売買のルールには使わない
 
+- コストは4通り：一律0.3%（基本）、一律0.5%（併記）、銘柄ごと（片道 = max(0.3%, 1呼値 ÷ 約定価格)。評価役のフェーズ2の
+  指摘1）、コストなし。予算固定では「損益分岐の片道コスト」（一律）も出す
+
 出力：reports/<prefix>_baselines.json、reports/<prefix>_equity.png、reports/<prefix>_random.png
-- prefix の初期値は phase2b（貸借信用区分「その他」をユニバースから除いた後。2026-10-04 承認）
+- prefix の初期値は phase2c（2026-10-04：案A の除外、継続の判断の評価額の修正、ユニバース平均の売りの判定の修正、
+  銘柄ごとのコストを入れた後）。phase2b は「その他」の除外の後、phase2 は除外の前
 - reports/phase2_*（除外前）は評価役が検証中の数字なので上書きしない。既にある出力ファイルは上書きせずに止まる
 - 除外前の結果を再現するには、コミット 8d391c7 のコードを使う
 実行：python -m src.analysis.phase2_baselines [--random-runs 1000] [--prefix phase2b]
@@ -28,7 +32,7 @@ import pandas as pd
 from src.backtest.baselines import RandomScore, momentum, past_return, reversal, universe_average
 from src.backtest.engine import BUDGET_MODES, CONTINUATION_MODES, Backtester, Rules
 from src.backtest.market import JST, load_market
-from src.backtest.metrics import regime_by_quarter, summarize, t_stat, weekly_rank_ic
+from src.backtest.metrics import breakeven_one_way_cost, regime_by_quarter, summarize, t_stat, weekly_rank_ic
 from src.backtest.target import make_weeks, weekly_realized
 from src.backtest.universe import avg_turnover, universe_mask
 from src.config import ROOT, load_config
@@ -92,7 +96,7 @@ def top_n_picks(m, universe, score_arr, weeks, n) -> pd.DataFrame:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--random-runs", type=int, default=1000)
-    ap.add_argument("--prefix", default="phase2b")
+    ap.add_argument("--prefix", default="phase2c")
     args = ap.parse_args()
     outputs = [ROOT / "reports" / f"{args.prefix}_{k}" for k in ("baselines.json", "equity.png", "random.png")]
     exists = [str(o) for o in outputs if o.exists()]
@@ -110,7 +114,11 @@ def main() -> None:
     week_last = pd.Series([m.dates[w.last] for w in weeks])
     tax = cfg["tax"]["rate"]
     regime = regime_by_quarter(m.dates, m.topix)
-    costs = {"cost_0.3%": cfg["cost"]["one_way"], "cost_0.5%": cfg["cost"]["one_way_stress"], "no_cost": 0.0}
+    costs = {"cost_0.3%": {"cost": cfg["cost"]["one_way"], "cost_model": "flat"},
+             "cost_0.5%": {"cost": cfg["cost"]["one_way_stress"], "cost_model": "flat"},
+             "cost_tick": {"cost": cfg["cost"]["one_way"], "cost_model": "tick"},
+             "no_cost": {"cost": 0.0, "cost_model": "flat"}}
+    capital = cfg["capital"]["initial_capital_jpy"]
     main_mode = cfg["backtest"]["continuation"]
     n = cfg["capital"]["n_holdings"]
 
@@ -119,7 +127,7 @@ def main() -> None:
         return Rules.from_config(cfg, **kw)
 
     # ユニバース平均（ベースライン4、超過リターンの基準）
-    ua = {name: universe_average(m, u, weeks, cfg["order"]["limit_up_pct"], c)[1] for name, c in costs.items()}
+    ua = {name: universe_average(m, u, weeks, cfg["order"]["limit_up_pct"], **c)[1] for name, c in costs.items()}
     bench = pd.Series(ua["no_cost"])
     start_pred = str(m.dates[weeks[0].pred])
 
@@ -148,6 +156,7 @@ def main() -> None:
         report["universe_average"][name] = summarize(uw, eq, bench, start_pred=start_pred, tax_rate=tax,
                                                      regime=regime)
     fill = universe_average(m, u, weeks, cfg["order"]["limit_up_pct"], 0.0)[2]
+    report["meta"]["cost_models"] = {k: v for k, v in costs.items()}
     report["universe_average"]["fill_rate_mean"] = float(np.nanmean(fill))
 
     # モメンタム・リバーサル（予算の決め方2通り × コスト3通り）
@@ -160,8 +169,13 @@ def main() -> None:
         for budget in BUDGET_MODES:
             report["baselines"][sname][budget] = {}
             for cname, c in costs.items():
-                res = Backtester(m, u, adv, rules(cost=c, budget_mode=budget)).run(sfn, start, end)
+                res = Backtester(m, u, adv, rules(budget_mode=budget, **c)).run(sfn, start, end)
                 sm = summarize_run(res)
+                if budget == "fixed" and cname == "cost_0.3%":
+                    sm["breakeven_one_way_cost_vs_universe"] = breakeven_one_way_cost(
+                        res.weekly, capital, bench, start_pred=start_pred)
+                    sm["breakeven_one_way_cost_vs_zero"] = breakeven_one_way_cost(
+                        res.weekly, capital, None, start_pred=start_pred)
                 sm["order_rank_mean"] = float(res.orders["rank"].mean())
                 sm["order_rank_median"] = float(res.orders["rank"].median())
                 sm["order_limit_price_median"] = float(res.orders["limit"].median())
@@ -201,10 +215,14 @@ def main() -> None:
     for seed in range(args.random_runs):
         for budget in BUDGET_MODES:
             for cname, c in costs.items():
-                res = Backtester(m, u, adv, rules(cost=c, budget_mode=budget)).run(
+                res = Backtester(m, u, adv, rules(budget_mode=budget, **c)).run(
                     RandomScore(len(m.codes), seed), start, end)
                 sm = summarize_run(res)
-                rnd[budget][cname].append({k: sm[k] for k in RANDOM_KEYS})
+                row = {k: sm[k] for k in RANDOM_KEYS}
+                if budget == "fixed" and cname == "cost_0.3%":
+                    be = breakeven_one_way_cost(res.weekly, capital, bench, start_pred=start_pred)
+                    row["breakeven_one_way_cost_vs_universe"] = np.nan if be is None else be
+                rnd[budget][cname].append(row)
                 if cname == "cost_0.3%":
                     if budget == "min_equity":
                         rnd_picks.append(order_picks(m, res.orders))

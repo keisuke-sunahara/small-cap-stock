@@ -2,6 +2,7 @@
 import copy
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from src.backtest.baselines import ArrayScore, past_return, universe_average
@@ -212,3 +213,84 @@ def test_fixed_budget_mode_keeps_budget_after_losses():
     assert base.weekly["ret"].iloc[1] == pytest.approx(300 * 10 / 55_000)
     assert fixed.weekly["ret"].iloc[1] == pytest.approx(600 * 10 / 100_000)
     assert fixed.curve[-1] == pytest.approx(0.55 * 1.06)
+
+
+def test_continuation_budget_values_holdings_at_decision_day_after_consolidation():
+    """最終日の朝に併合が効く保有銘柄を、継続の判断（前日の順位・基本ルールの予算）で正しく評価する（評価役の指摘3）。
+
+    N=1。2週目に 11110 を900円で100株。最終日（金曜）の朝に10株→1株の併合（株価9,000円）。
+    木曜の順位は 22220（500円）が1位。木曜の総資産は 10,000 + 100株 × 900円 = 100,000円なので予算は10万円で、
+    22220 は買える → 上位1に入る → 11110 は継続せず売る。
+    併合後の株数（10株）× 木曜の併合前の株価（900円）で評価すると総資産が19,000円になり、22220 が買えないと判定されて
+    11110 を誤って持ち越す。
+    """
+    dates = dummy_dates("2024-01-08", 15)
+    a = [900.0] * 9 + [9000.0] * 6
+    m = dummy_market(dates, {"11110": a, "22220": [500.0] * 15})
+    m.adj[9, 0] = 10.0
+    m.cumF = np.cumprod(m.adj, axis=0)
+    score = const_score(m, {"11110": 2, "22220": 1})
+    score[8:, 0] = 0                                    # 木曜から 11110 は2位
+    res = run(m, score, continuation="prev_day", budget_mode="min_equity")
+    sells = res.trades[res.trades["side"] == "sell"]
+    assert sells["code"].tolist() == ["11110"]
+    assert sells["date"].tolist() == [dates[9]]
+    assert sells["shares"].tolist() == [pytest.approx(10.0)]
+    assert res.equity[9] == pytest.approx(100_000)      # 併合の前後で資産は変わらない（コスト0）
+
+
+def test_tick_cost_model():
+    """cost_model="tick"：片道 = max(cost, 1呼値 ÷ 約定価格)。80円の株は1円 ÷ 80円 = 1.25%。"""
+    dates = dummy_dates("2024-01-08", 10)
+    m = dummy_market(dates, {"11110": [80.0] * 10})
+    cfg = copy.deepcopy(CFG)
+    cfg["cost"]["one_way"] = 0.003
+    flat = run(m, const_score(m, {"11110": 1}), cfg)
+    tick = run(m, const_score(m, {"11110": 1}), cfg, cost_model="tick")
+    # 指値 81円、予算10万円 → 1,200株（97,200円）。始値80円で買い、終値80円で売る
+    assert flat.equity[9] == pytest.approx(100_000 - 96_000 * 0.003 * 2)
+    assert tick.equity[9] == pytest.approx(100_000 - 96_000 * (1 / 80) * 2)
+    assert tick.weekly["cost_paid"].iloc[-1] == pytest.approx(96_000 * (1 / 80) * 2)
+    assert tick.weekly["traded_value"].iloc[-1] == pytest.approx(96_000 * 2)
+    # 高い株では一律のコストと同じ（2,000円の株の1呼値は 1円 ÷ 2,000円 = 0.05% < 0.3%）
+    from src.backtest.engine import Rules as R
+    r = R.from_config(cfg, cost_model="tick")
+    assert r.cost_rate(2000.0) == pytest.approx(0.003)
+    assert r.cost_rate(150.0) == pytest.approx(1 / 150)
+
+
+def test_universe_average_sells_next_open_after_limit_down_close():
+    """ユニバース平均も、ストップ安で引けた銘柄は次に寄った日の始値で売る（評価役の指摘4。エンジンと同じ）。"""
+    dates = dummy_dates("2024-01-08", 15)
+    c = [500.0] * 9 + [400.0] + [380.0] * 5
+    o = [500.0] * 10 + [390.0] + [380.0] * 4
+    m = dummy_market(dates, {"11110": c}, {"11110": o})
+    m.L[9, 0] = 400.0
+    m.LL[9, 0] = True
+    adv = avg_turnover(m, 2)
+    u = universe_mask(m, CFG, adv)
+    weeks = [w for w in make_weeks(m.dates) if w.pred >= 0]
+    gross, net, fill = universe_average(m, u, weeks, 0.02, 0.0)
+    assert gross[0] == pytest.approx(390 / 500 - 1)
+    # エンジンの結果と一致する
+    res = run(m, const_score(m, {"11110": 1}))
+    assert res.equity[14] == pytest.approx(100_000 - 50_000 + 39_000)
+
+
+def test_breakeven_one_way_cost_makes_excess_zero():
+    from src.backtest.metrics import annualized, breakeven_one_way_cost
+    rng = np.random.default_rng(1)
+    dates = dummy_dates("2024-01-08", 60)
+    close = {f"{k}0": list(300 + rng.normal(0, 8, 60).cumsum()) for k in range(1111, 1117)}
+    m = dummy_market(dates, close)
+    score = past_return(m, 5)
+    res = run(m, score, budget_mode="fixed")
+    sp = str(m.dates[make_weeks(m.dates)[1].pred])
+    bench = pd.Series(np.full(len(res.weekly), 0.001))
+    c = breakeven_one_way_cost(res.weekly, CFG["capital"]["initial_capital_jpy"], bench, start_pred=sp)
+    assert c is not None
+    cfg = copy.deepcopy(CFG)
+    cfg["cost"]["one_way"] = c
+    res_c = run(m, score, cfg, budget_mode="fixed")
+    last = res_c.weekly["last"].iloc[-1]
+    assert annualized(res_c.weekly["ret"], sp, last) - annualized(bench, sp, last) == pytest.approx(0, abs=1e-9)
