@@ -6,9 +6,19 @@
   100株も買えない銘柄、注文金額が平均売買代金の上限を超える銘柄、現金が足りない銘柄は飛ばして次の順位へ
 - d1 の寄付：始値 < 指値なら始値で買う（コストを加える）。約定しなければその週は現金のまま（予備の銘柄は買わない）
 - 営業日が1日しかない週（k = 1）は買わない。継続保有中の銘柄は、通常どおり最終営業日に継続か売却かを判断する
-- dk の大引け：継続保有の判断（continuation）に入らなかった保有銘柄を引成で売る。売れなければ、次に売買が成立した日の始値で売る
+- dk の大引け：予算（budget_mode）
+- "min_equity"：予算 = min(運用資金, 予測日の総資産) ÷ N（承認済みの基本ルール。実際の口座に近い）
+- "fixed"：予算 = 運用資金 ÷ N に固定し、毎週の損益 ÷ 運用資金 を週次リターンとする（戦略どうしの比較用。
+  負けると予算が縮んで超低位株しか買えなくなる連鎖を除くため。2026-10-04 ユーザーの依頼）
+
+継続保有の判断（continuation）に入らなかった保有銘柄を引成で売る。売れなければ、次に売買が成立した日の始値で売る
 - 保有中の分割・併合は株数を直す。上場廃止は最後に売買が成立した日の終値で売ったものとする
 - 評価額は毎営業日の終値（売買不成立の日は直前の終値）で計算する
+
+予算（budget_mode）
+- "min_equity"：予算 = min(運用資金, 予測日の総資産) ÷ N（承認済みの基本ルール。実際の口座に近い）
+- "fixed"：予算 = 運用資金 ÷ N に固定し、毎週の損益 ÷ 運用資金 を週次リターンとする（戦略どうしの比較用。
+  負けると予算が縮んで超低位株しか買えなくなる連鎖を除くため。2026-10-04 ユーザーの依頼）
 
 継続保有の判断（continuation）
 - "none"：継続保有しない（毎週すべて売る）
@@ -32,6 +42,7 @@ from src.backtest.target import Week, make_weeks
 
 ScoreFn = Callable[[int], np.ndarray]   # 日付の位置 → 銘柄ごとの点数（大きいほど上位。NaN は対象外）
 CONTINUATION_MODES = ("none", "prev_day", "same_day")
+BUDGET_MODES = ("min_equity", "fixed")
 
 
 @dataclass
@@ -43,16 +54,20 @@ class Rules:
     max_order_to_adv: float
     cost: float
     continuation: str = "prev_day"
+    budget_mode: str = "min_equity"
 
     @classmethod
     def from_config(cls, cfg: dict, **override) -> "Rules":
         kw = dict(n_holdings=cfg["capital"]["n_holdings"], capital=cfg["capital"]["initial_capital_jpy"],
                   limit_up_pct=cfg["order"]["limit_up_pct"], lot=cfg["order"]["lot_size"],
                   max_order_to_adv=cfg["order"]["max_order_to_adv"], cost=cfg["cost"]["one_way"],
-                  continuation=cfg["backtest"].get("continuation", "prev_day"))
+                  continuation=cfg["backtest"].get("continuation", "prev_day"),
+                  budget_mode=cfg["backtest"].get("budget_mode", "min_equity"))
         kw.update(override)
         if kw["continuation"] not in CONTINUATION_MODES:
             raise ValueError(f"continuation は {CONTINUATION_MODES} のどれか: {kw['continuation']}")
+        if kw["budget_mode"] not in BUDGET_MODES:
+            raise ValueError(f"budget_mode は {BUDGET_MODES} のどれか: {kw['budget_mode']}")
         return cls(**kw)
 
 
@@ -60,6 +75,7 @@ class Rules:
 class Result:
     dates: np.ndarray
     equity: np.ndarray                 # 各営業日の引け後の総資産（期間外は NaN）
+    curve: np.ndarray                  # 最大ドローダウンの計算に使う資産の推移（budget_mode により異なる）
     weekly: pd.DataFrame
     orders: pd.DataFrame
     trades: pd.DataFrame
@@ -153,11 +169,12 @@ class Backtester:
         for w in weeks:
             p = w.pred
             eq_p = value(p)
-            budget = min(r.capital, eq_p) / r.n_holdings
+            fixed = r.budget_mode == "fixed"
+            budget = (r.capital if fixed else min(r.capital, eq_p)) / r.n_holdings
             orders: list[dict] = []
             if len(w.days) >= 2:
                 orders = self.build_orders(p, set(pos) | set(pending), r.n_holdings - len(pos),
-                                           budget, cash, score_fn)
+                                           budget, float("inf") if fixed else cash, score_fn)
             n_filled = 0
             invested_after_open = False
             for t in w.days:
@@ -171,13 +188,15 @@ class Backtester:
                 for book in (pos, pending):
                     for j in [j for j in book if m.last_listed[j] < t]:
                         px = self.C_ff[m.last_listed[j], j]
-                        cash += book.pop(j) * px * (1 - r.cost)
-                        trades.append((m.dates[t], j, "sell", px, "delisted"))
+                        sh = book.pop(j)
+                        cash += sh * px * (1 - r.cost)
+                        trades.append((m.dates[t], j, "sell", sh, px, "delisted"))
                 # 寄付：売れ残りの売り
                 for j in list(pending):
                     if open_sell_filled(m.O[t, j]):
-                        cash += pending.pop(j) * m.O[t, j] * (1 - r.cost)
-                        trades.append((m.dates[t], j, "sell", m.O[t, j], "open_retry"))
+                        sh = pending.pop(j)
+                        cash += sh * m.O[t, j] * (1 - r.cost)
+                        trades.append((m.dates[t], j, "sell", sh, m.O[t, j], "open_retry"))
                 # 寄付：買い
                 if t == w.first:
                     for o in orders:
@@ -190,7 +209,7 @@ class Backtester:
                             cash -= o["shares"] * m.O[t, j] * (1 + r.cost)
                             pos[j] = float(o["shares"])
                             n_filled += 1
-                            trades.append((m.dates[t], j, "buy", m.O[t, j], "open_limit"))
+                            trades.append((m.dates[t], j, "buy", float(o["shares"]), m.O[t, j], "open_limit"))
                     invested_after_open = len(pos) > 0
                 # 大引け：継続保有の判断と引成の売り
                 if t == w.last and pos:
@@ -199,12 +218,13 @@ class Backtester:
                         kept: set[int] = set()
                     else:
                         c = t - 1 if r.continuation == "prev_day" else t
-                        kept = self.kept_positions(c, held, score_fn, min(r.capital, value(c)) / r.n_holdings)
+                        b = r.capital if r.budget_mode == "fixed" else min(r.capital, value(c))
+                        kept = self.kept_positions(c, held, score_fn, b / r.n_holdings)
                     for j in held - kept:
                         sh = pos.pop(j)
                         if close_sell_filled(m.C[t, j], m.L[t, j], bool(m.LL[t, j])):
                             cash += sh * m.C[t, j] * (1 - r.cost)
-                            trades.append((m.dates[t], j, "sell", m.C[t, j], "close"))
+                            trades.append((m.dates[t], j, "sell", sh, m.C[t, j], "close"))
                         else:
                             pending[j] = sh
                 equity[t] = value(t)
@@ -214,12 +234,18 @@ class Backtester:
                               "n_pending_end": len(pending)})
         weekly = pd.DataFrame(week_rows)
         prev = np.concatenate([[equity[weeks[0].pred]], weekly["equity"].to_numpy()[:-1]])
-        weekly["ret"] = weekly["equity"].to_numpy() / prev - 1
+        if r.budget_mode == "fixed":
+            # 毎週、資金を運用資金（30万円）に戻したとみなす：その週の損益 ÷ 運用資金。現金のマイナスは補充したとみなす
+            weekly["ret"] = (weekly["equity"].to_numpy() - prev) / r.capital
+            curve = np.concatenate([[1.0], np.cumprod(1 + weekly["ret"].to_numpy())])
+        else:
+            weekly["ret"] = weekly["equity"].to_numpy() / prev - 1
+            curve = equity
         orders_df = pd.DataFrame(order_rows)
         if len(orders_df):
             orders_df["code"] = m.codes[orders_df["j"].to_numpy()]
-        trades_df = pd.DataFrame(trades, columns=["date", "j", "side", "price", "reason"])
+        trades_df = pd.DataFrame(trades, columns=["date", "j", "side", "shares", "price", "reason"])
         if len(trades_df):
             trades_df["code"] = m.codes[trades_df["j"].to_numpy()]
-        return Result(dates=m.dates, equity=equity, weekly=weekly, orders=orders_df, trades=trades_df,
+        return Result(dates=m.dates, equity=equity, curve=curve, weekly=weekly, orders=orders_df, trades=trades_df,
                       rules=r, meta={"start_pred": m.dates[weeks[0].pred], "end": m.dates[weeks[-1].last]})

@@ -18,7 +18,7 @@ def max_drawdown(equity: np.ndarray) -> float:
 
 def annualized(weekly_ret: pd.Series, first_date: str, last_date: str) -> float:
     growth = float(np.prod(1 + weekly_ret.to_numpy()))
-    years = (pd.Timestamp(last_date) - pd.Timestamp(first_date)).days / 365.25
+    years = (pd.Timestamp(str(last_date)) - pd.Timestamp(str(first_date))).days / 365.25
     return growth ** (1 / years) - 1 if years > 0 and growth > 0 else float("nan")
 
 

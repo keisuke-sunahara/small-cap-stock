@@ -193,3 +193,22 @@ def test_universe_average_uses_same_fill_rule():
     assert gross[0] == pytest.approx(0.05)
     assert fill[0] == pytest.approx(0.5)
     assert net[0] == pytest.approx((1.1 * 0.997 / 1.003 - 1) / 2)
+
+
+def test_fixed_budget_mode_keeps_budget_after_losses():
+    # 2週目に半値になって損をした後、3週目の予算が縮むか（min_equity）、固定のままか（fixed）
+    dates = dummy_dates("2024-01-08", 15)
+    c = [300.0] * 5 + [300.0] * 4 + [150.0] + [150.0] * 4 + [160.0]
+    m = dummy_market(dates, {"11110": c})
+    score = const_score(m, {"11110": 1})
+    base = run(m, score, budget_mode="min_equity")
+    fixed = run(m, score, budget_mode="fixed")
+    # 2週目：指値306円・300株（91,800円）。終値150円で売り → 総資産 100,000 − 45,000 = 55,000
+    assert base.orders["shares"].tolist() == [300, 300]   # 3週目：予算 55,000 → 指値153円で300株
+    assert fixed.orders["shares"].tolist() == [300, 600]  # 3週目：予算 100,000 → 600株
+    # weekly の1行目が2週目（1週目は予測日が無いため対象外）
+    assert base.weekly["ret"].iloc[0] == pytest.approx(-0.45)
+    assert fixed.weekly["ret"].iloc[0] == pytest.approx(-0.45)
+    assert base.weekly["ret"].iloc[1] == pytest.approx(300 * 10 / 55_000)
+    assert fixed.weekly["ret"].iloc[1] == pytest.approx(600 * 10 / 100_000)
+    assert fixed.curve[-1] == pytest.approx(0.55 * 1.06)
