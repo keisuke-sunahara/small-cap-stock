@@ -23,9 +23,11 @@ backtest:
   # 過去の売買単位データが無いため、売買単位が100株に統一された2018-10-01以降に限定する（DECISIONS.md参照）
   trade_start_date: "2018-10-01"
   # 継続保有の判断（src/backtest/engine.py）。none / prev_day / same_day。
-  # 暫定で prev_day（最終営業日の前の営業日の引け後の順位で判断）。フェーズ2の承認で確定する（DECISIONS.md）
+  # prev_day（最終営業日の前の営業日の引け後の順位で判断）で確定（2026-10-04 承認、CLAUDE.md 第5章）。
+  # same_day は引け値を見てから引けで売ることになり実行できないため、参考値にだけ使う
   continuation: prev_day
-  # 予算の決め方。min_equity：min(運用資金, 総資産) ÷ N（基本ルール）。fixed：運用資金 ÷ N に固定（比較用に併記）
+  # 予算の決め方。min_equity：min(運用資金, 総資産) ÷ N（基本ルール）。fixed：運用資金 ÷ N に固定。
+  # 戦略どうしの比較は fixed で行い、min_equity を併記する（2026-10-04 承認、CLAUDE.md 第5章）
   budget_mode: min_equity
 
 capital:
