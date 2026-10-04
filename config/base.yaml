@@ -41,8 +41,10 @@ order:
   adv_window: 20
 
 cost:
-  one_way: 0.003              # 手数料＋スリッページ（片道）
+  one_way: 0.003              # 片道。手数料0円（楽天証券ゼロコース）＋自分の注文による寄付・引けの値動き（DECISIONS.md）
   one_way_stress: 0.005       # 併記用
+  # 基本は一律（flat）。比較用に tick（片道 = max(one_way, 1呼値 ÷ 約定価格)）を併記する（評価役のフェーズ2の指摘1）
+  model: flat
 
 tax:
   rate: 0.20315
@@ -55,6 +57,9 @@ universe:
   min_price_jpy: 50
   # 予測日の銘柄一覧で貸借信用区分が「その他（3）」の銘柄を除く（2026-10-04 承認、CLAUDE.md 第5章）
   exclude_margin_other: true
+  # 本番（ペーパートレード・実運用）だけ、翌営業日の一覧（予測日の17:30頃に公開）の「その他」も除く。
+  # バックテストでは使わない（過去の一覧は翌営業日8:00の更新の後の版のため。2026-10-04 承認、CLAUDE.md 第5章）
+  exclude_margin_other_next_day_in_production: true
   # 調整係数のある日をまたぐ調整後リターンが ±30% を超えた銘柄を、分かった日から60営業日除く。
   # 学習用データでは、目的変数の期間にその係数の日がある行も除く（2026-10-04 承認、reports/phase1_review.md 3.3 の案A）
   bad_adjfactor_threshold: 0.3
