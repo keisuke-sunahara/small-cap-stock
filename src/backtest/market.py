@@ -5,6 +5,8 @@ data/raw から作り、data/processed/ に保存して再利用する（ホー�
 - 株価は調整前の実際の値（O・H・L・C）。分割・併合の調整は cumF（調整係数の累積積）で行う
   （その日までの係数だけを使うため、後の分割の情報を含まない。DECISIONS.md 2026-10-04）
 - 発行済株式数は、開示の利用開始日（src.data.disclosure）から使う。期末日の後の分割は cumF で直す
+- 貸借信用区分が「その他（3）」の印（margin_other）は、日付 t の銘柄一覧の値。日付 t の一覧は t の前の営業日の
+  17:30 頃に公開されるので、t の引け後には確実に分かる（ユニバースからの除外に使う。CLAUDE.md 第5章、2026-10-04 承認）
 
 実行（作り直し）: python -m src.backtest.market --rebuild
 """
@@ -27,8 +29,8 @@ from src.data.fetch import business_days, raw_dir
 from src.data.load import read_raw
 
 JST = ZoneInfo("Asia/Tokyo")
-CACHE_VERSION = "v1"
-ARRAYS = ["O", "H", "L", "C", "Va", "adj", "UL", "LL", "common", "shares_base"]
+CACHE_VERSION = "v2"   # v2：margin_other を追加（2026-10-04）
+ARRAYS = ["O", "H", "L", "C", "Va", "adj", "UL", "LL", "common", "shares_base", "margin_other"]
 
 
 @dataclass
@@ -47,9 +49,12 @@ class Market:
     shares_base: np.ndarray    # 発行済株式数 × cumF（開示の利用開始日から。cumF で割ると当日の株数）
     last_listed: np.ndarray    # 銘柄一覧に最後に載っていた日の位置 [N]（データの最終日なら T-1）
     topix: np.ndarray          # TOPIX の終値 [T]
+    margin_other: np.ndarray | None = None  # その日の銘柄一覧で貸借信用区分が「その他（3）」（bool）
     meta: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        if self.margin_other is None:
+            self.margin_other = np.zeros(self.C.shape, dtype=bool)
         self.cumF = np.cumprod(self.adj, axis=0)
         self.date_index = {d: i for i, d in enumerate(self.dates)}
         self.code_index = {c: j for j, c in enumerate(self.codes)}
@@ -107,7 +112,7 @@ def build_market(cfg: dict) -> Market:
     di = {d: i for i, d in enumerate(bdays)}
     T = len(bdays)
 
-    master = read_raw(cfg, "master", columns=["Code", "Mkt", "ProdCat"])
+    master = read_raw(cfg, "master", columns=["Code", "Mkt", "ProdCat", "Mrgn"])
     master["Code"] = master["Code"].astype(str)
     master["is_common"] = is_common(master)
     codes = np.array(sorted(master.loc[master["is_common"], "Code"].unique()))
@@ -118,6 +123,8 @@ def build_market(cfg: dict) -> Market:
     mj = master["Code"].map(ci).to_numpy()
     common = np.zeros((T, N), dtype=bool)
     common[mi[master["is_common"].to_numpy()], mj[master["is_common"].to_numpy()]] = True
+    margin_other = np.zeros((T, N), dtype=bool)
+    margin_other[mi, mj] = master["Mrgn"].astype(str).eq("3").to_numpy()
     last_listed = np.full(N, -1, dtype=np.int64)
     np.maximum.at(last_listed, mj, mi)
 
@@ -165,7 +172,7 @@ def build_market(cfg: dict) -> Market:
             "cache_version": CACHE_VERSION}
     return Market(dates=np.array(bdays), codes=codes, O=arr["O"], H=arr["H"], L=arr["L"], C=arr["C"],
                   Va=va, adj=adj, UL=ul, LL=ll, common=common, shares_base=shares_base,
-                  last_listed=last_listed, topix=topix, meta=meta)
+                  last_listed=last_listed, topix=topix, margin_other=margin_other, meta=meta)
 
 
 def cache_path(cfg: dict) -> Path:

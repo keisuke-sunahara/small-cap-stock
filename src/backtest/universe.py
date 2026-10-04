@@ -6,6 +6,8 @@
 - 過去 turnover_window 営業日（その日を含む）の平均売買代金が下限以上。売買不成立の日は0として平均する。
   上場してから turnover_window 営業日に満たない銘柄は除く
 - その日の終値が下限以上。その日に売買が成立していない銘柄は除く（翌営業日の指値を決められないため）
+- exclude_margin_other が true なら、その日の銘柄一覧で貸借信用区分が「その他（3）」の銘柄を除く
+  （監理・整理銘柄、TOB後の銘柄などを、その時点の情報で外す。翌営業日の一覧は使わない。2026-10-04 承認）
 """
 from __future__ import annotations
 
@@ -44,4 +46,6 @@ def universe_mask(m: Market, cfg: dict, adv: np.ndarray | None = None) -> np.nda
                 & (m.C >= u["min_price_jpy"])
                 & (mcap <= u["max_market_cap_jpy"])
                 & (adv >= u["min_avg_turnover_jpy"]))
+    if u.get("exclude_margin_other", False):
+        mask &= ~m.margin_other
     return mask & ~np.isnan(m.C) & ~np.isnan(mcap) & ~np.isnan(adv)

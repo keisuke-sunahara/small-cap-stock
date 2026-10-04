@@ -53,6 +53,8 @@ universe:
   min_avg_turnover_jpy: 30000000    # 3,000万円（過去20営業日平均）
   turnover_window: 20
   min_price_jpy: 50
+  # 予測日の銘柄一覧で貸借信用区分が「その他（3）」の銘柄を除く（2026-10-04 承認、CLAUDE.md 第5章）
+  exclude_margin_other: true
 
 target:
   horizon_days: 5

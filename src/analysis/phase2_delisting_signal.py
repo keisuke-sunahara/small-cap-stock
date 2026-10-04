@@ -55,6 +55,8 @@ def episodes(flag: np.ndarray, listed: np.ndarray, j: int) -> list[tuple[int, in
 
 def main() -> None:
     cfg = load_config()
+    # 除外前のユニバースで集計する（2026-10-04 の結果の再現のため。除外の判断材料を作る集計なので）
+    cfg["universe"]["exclude_margin_other"] = False
     m = load_market(cfg)
     T, N = len(m.dates), len(m.codes)
     master = read_raw(cfg, "master", columns=["Code", "Mrgn"])

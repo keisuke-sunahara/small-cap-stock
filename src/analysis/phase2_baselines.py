@@ -7,8 +7,11 @@
 - 上場廃止の集計（ユーザーの依頼、2026-10-04）：選ばれた（注文を出した）銘柄のうち、予測日から30営業日以内に
   上場廃止になった割合。判断材料にだけ使い、売買のルールには使わない
 
-出力：reports/phase2_baselines.json、reports/phase2_equity.png、reports/phase2_random.png
-実行：python -m src.analysis.phase2_baselines [--random-runs 1000]
+出力：reports/<prefix>_baselines.json、reports/<prefix>_equity.png、reports/<prefix>_random.png
+- prefix の初期値は phase2b（貸借信用区分「その他」をユニバースから除いた後。2026-10-04 承認）
+- reports/phase2_*（除外前）は評価役が検証中の数字なので上書きしない。既にある出力ファイルは上書きせずに止まる
+- 除外前の結果を再現するには、コミット 8d391c7 のコードを使う
+実行：python -m src.analysis.phase2_baselines [--random-runs 1000] [--prefix phase2b]
 """
 from __future__ import annotations
 
@@ -89,7 +92,12 @@ def top_n_picks(m, universe, score_arr, weeks, n) -> pd.DataFrame:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--random-runs", type=int, default=1000)
+    ap.add_argument("--prefix", default="phase2b")
     args = ap.parse_args()
+    outputs = [ROOT / "reports" / f"{args.prefix}_{k}" for k in ("baselines.json", "equity.png", "random.png")]
+    exists = [str(o) for o in outputs if o.exists()]
+    if exists:
+        raise SystemExit(f"出力ファイルが既にあります（上書きしません）: {exists}")
     t0 = time.time()
     cfg = load_config()
     m = load_market(cfg)
@@ -128,6 +136,8 @@ def main() -> None:
                              "continuation_main": main_mode, "n_holdings": n,
                              "capital": cfg["capital"]["initial_capital_jpy"],
                              "random_runs": args.random_runs,
+                             "exclude_margin_other": bool(cfg["universe"].get("exclude_margin_other", False)),
+                             "market_cache_version": m.meta.get("cache_version"),
                              "universe_size_per_pred": {"min": int(usize.min()), "median": float(np.median(usize)),
                                                         "max": int(usize.max())}}}
     uw = pd.DataFrame({"last": week_last, "invested": True})
@@ -242,7 +252,7 @@ def main() -> None:
     report["delisting"]["universe_all"] = us
     report["meta"]["elapsed_sec"] = round(time.time() - t0, 1)
 
-    out = ROOT / "reports" / "phase2_baselines.json"
+    out = outputs[0]
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2, default=float), encoding="utf-8")
 
     # グラフ
@@ -261,7 +271,7 @@ def main() -> None:
         ax.grid(alpha=0.3)
     fig.suptitle("ベースラインの資産の推移（初期値=1、対数目盛り）")
     fig.tight_layout()
-    fig.savefig(ROOT / "reports" / "phase2_equity.png", dpi=110)
+    fig.savefig(outputs[1], dpi=110)
     plt.close(fig)
     fig, axes = plt.subplots(1, 2, figsize=(14, 4))
     for ax, budget in zip(axes, BUDGET_MODES):
@@ -275,7 +285,7 @@ def main() -> None:
         ax.set_title(f"ランダム選択 {args.random_runs} 回の分布：{TITLES[budget]}", fontsize=9)
         ax.legend(fontsize=7)
     fig.tight_layout()
-    fig.savefig(ROOT / "reports" / "phase2_random.png", dpi=110)
+    fig.savefig(outputs[2], dpi=110)
     plt.close(fig)
     print(f"保存: {out}（{time.time() - t0:.0f}秒）")
 
