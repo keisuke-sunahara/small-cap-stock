@@ -5,6 +5,9 @@
 - 特徴量：t の値（t の引け後に入手できる情報だけ。src.features）。normalize = "rank" なら、日ごとにユニバース内の
   順位（0〜1）に直す（外れ値と、相場全体の水準の違いの影響を除くため）。NaN は NaN のまま
 - 目的変数：t の翌営業日の始値から t+5 の終値までのリターンの、t のユニバース内での順位（0〜1。src.backtest.target）
+  bad_event（src.backtest.universe.bad_factor_events。株価の動きと合わない調整係数の日）を渡すと、
+  t+2 〜 t+horizon にその日がある行の目的変数を NaN にし、順位の計算からも外す（2026-10-04 承認、案A）。
+  学習と評価では、目的変数が NaN の行を使わない
 
 ウォークフォワードの分割（walk_forward_splits）
 - 評価期間を暦の月ごとに区切り、月ごとに学習し直す（retrain_frequency: monthly）
@@ -41,8 +44,22 @@ def normalize(arr: np.ndarray, universe: np.ndarray, how: str) -> np.ndarray:
     raise ValueError(f"normalize は none / rank: {how}")
 
 
+def label_spans_bad_event(bad_event: np.ndarray, horizon: int) -> np.ndarray:
+    """起点 t の目的変数の期間（t+1 の始値 → t+horizon の終値）の間に bad_event の日がある [T, N]。
+
+    t+1 の係数は始値と終値の両方に同じように効くので、見るのは t+2 〜 t+horizon。
+    """
+    T = bad_event.shape[0]
+    c = np.cumsum(bad_event, axis=0)
+    out = np.zeros(bad_event.shape, dtype=bool)
+    if T > horizon:
+        out[: T - horizon] = (c[horizon:] - c[1: T - horizon + 1]) > 0
+    return out
+
+
 def daily_panel(m: Market, universe: np.ndarray, features: dict[str, np.ndarray], horizon: int,
-                how: str = "rank", t_index: np.ndarray | None = None) -> Panel:
+                how: str = "rank", t_index: np.ndarray | None = None,
+                bad_event: np.ndarray | None = None) -> Panel:
     """t_index の各日（省略時は全営業日）のユニバースの行。"""
     names = list(features)
     t_index = np.arange(len(m.dates)) if t_index is None else np.asarray(t_index)
@@ -51,7 +68,8 @@ def daily_panel(m: Market, universe: np.ndarray, features: dict[str, np.ndarray]
     X = np.empty((len(ti), len(names)), dtype=np.float32)
     for k, n in enumerate(names):
         X[:, k] = normalize(features[n][t_index], sub, how)[ti, jj]
-    y = cross_section_rank(forward_return(m, horizon), universe)[t_index][ti, jj]
+    label_ok = universe if bad_event is None else universe & ~label_spans_bad_event(bad_event, horizon)
+    y = cross_section_rank(forward_return(m, horizon), label_ok)[t_index][ti, jj]
     return Panel(t=t_index[ti], j=jj, X=X, y=y.astype(np.float32), names=names)
 
 

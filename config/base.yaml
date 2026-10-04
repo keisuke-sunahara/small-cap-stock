@@ -55,6 +55,10 @@ universe:
   min_price_jpy: 50
   # 予測日の銘柄一覧で貸借信用区分が「その他（3）」の銘柄を除く（2026-10-04 承認、CLAUDE.md 第5章）
   exclude_margin_other: true
+  # 調整係数のある日をまたぐ調整後リターンが ±30% を超えた銘柄を、分かった日から60営業日除く。
+  # 学習用データでは、目的変数の期間にその係数の日がある行も除く（2026-10-04 承認、reports/phase1_review.md 3.3 の案A）
+  bad_adjfactor_threshold: 0.3
+  bad_adjfactor_exclude_days: 60
 
 target:
   horizon_days: 5
