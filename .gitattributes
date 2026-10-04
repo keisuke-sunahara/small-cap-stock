@@ -1,0 +1,25 @@
+# 改行コードの固定（2026-10-04、docs/DECISIONS.md 参照）
+# テキストファイルはリポジトリ内では LF で保存し、作業フォルダでも LF で取り出す。
+# Windows のツールが CRLF で書き出しても、コミット時に LF に正規化されるため、
+# 改行コードの違いだけでファイル全体が変更扱いになることを防ぐ。
+# 既に CRLF でコミット済みのファイルは、text=auto の仕様により変換されない（中身は変わらない）。
+* text=auto eol=lf
+
+# Windows 専用のスクリプトは CRLF のままにする
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# バイナリ（改行の変換も差分の表示もしない）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.parquet binary
+*.pkl binary
+*.joblib binary
+*.npy binary
+*.npz binary
+*.zip binary
+*.gz binary
+*.xlsx binary
