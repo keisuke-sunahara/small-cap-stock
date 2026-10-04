@@ -1,0 +1,173 @@
+{
+  "delisted_common": {
+    "codes": 616,
+    "other_on_last_day": 423,
+    "ratio": 0.6866883116883117,
+    "lead_bdays_quantiles": {
+      "0.1": 10.0,
+      "0.25": 12.0,
+      "0.5": 16.0,
+      "0.75": 19.0,
+      "0.9": 21.0
+    },
+    "lead_bdays_ge_5_ratio": 0.9976359338061466,
+    "lead_bdays_ge_10_ratio": 0.9527186761229315,
+    "abs_move_last20_median_flagged": 0.0014149319110940972,
+    "abs_move_last20_median_not_flagged": 0.05595938732761274,
+    "abs_move_last20_over_20pct_flagged": 0.0673076923076923,
+    "abs_move_last20_over_20pct_not_flagged": 0.036458333333333336
+  },
+  "other_episodes": {
+    "ends_with_delisting": {
+      "count": 423,
+      "median_length_bdays": 17.0
+    },
+    "right_after_listing": {
+      "count": 780,
+      "median_length_bdays": 1.0
+    },
+    "returned": {
+      "count": 56,
+      "median_length_bdays": 244.0
+    },
+    "ongoing_at_data_end": {
+      "count": 20,
+      "median_length_bdays": 92.0
+    }
+  },
+  "excluded_per_week": {
+    "universe": {
+      "mean": 3.6675824175824174,
+      "median": 3.0,
+      "p90": 7.0,
+      "max": 14,
+      "share_of_universe_mean": 0.003359900007102607,
+      "by_year_mean": {
+        "2018": 2.36,
+        "2019": 1.92,
+        "2020": 2.52,
+        "2021": 4.21,
+        "2022": 3.88,
+        "2023": 3.38,
+        "2024": 3.51,
+        "2025": 7.78
+      }
+    },
+    "affordable_at_n": {
+      "mean": 2.9615384615384617,
+      "median": 3.0,
+      "p90": 5.699999999999989,
+      "max": 12,
+      "share_of_affordable_mean": 0.006399758794490678
+    }
+  },
+  "universe_on_pred_dates": {
+    "other_rows_delisted_within": {
+      "60": 0.2302325581395349,
+      "120": 0.237984496124031,
+      "250": 0.24108527131782945
+    },
+    "other_per_week": {
+      "mean": 3.6675824175824174,
+      "max": 14,
+      "weeks_with_any": 356,
+      "weeks": 364
+    },
+    "other_rows": 1290,
+    "other_rows_delisted_within_30": 272,
+    "other_rows_delisted_ratio": 0.21085271317829457,
+    "universe_rows_delisted_within_30": 932,
+    "share_of_delisted_rows_flagged_other": 0.2918454935622318,
+    "non_other_rows_delisted_ratio": 0.001699379726399864
+  },
+  "baseline_top_picks": {
+    "momentum_20d": {
+      "picks": 1074,
+      "picks_flagged_other": 18,
+      "delisted_within_30": 3,
+      "delisted_flagged_other_on_pred_date": 1,
+      "examples": [
+        {
+          "pred_date": "2019-09-20",
+          "code": "42390",
+          "other_on_pred": false,
+          "last_listed": "2019-11-07"
+        },
+        {
+          "pred_date": "2023-12-29",
+          "code": "14000",
+          "other_on_pred": true,
+          "last_listed": "2023-12-29"
+        },
+        {
+          "pred_date": "2024-12-13",
+          "code": "42950",
+          "other_on_pred": false,
+          "last_listed": "2025-01-29"
+        }
+      ]
+    },
+    "reversal_5d": {
+      "picks": 1074,
+      "picks_flagged_other": 27,
+      "delisted_within_30": 9,
+      "delisted_flagged_other_on_pred_date": 7,
+      "examples": [
+        {
+          "pred_date": "2019-01-25",
+          "code": "22280",
+          "other_on_pred": true,
+          "last_listed": "2019-02-15"
+        },
+        {
+          "pred_date": "2021-06-25",
+          "code": "75190",
+          "other_on_pred": false,
+          "last_listed": "2021-07-21"
+        },
+        {
+          "pred_date": "2022-01-21",
+          "code": "65410",
+          "other_on_pred": false,
+          "last_listed": "2022-02-25"
+        },
+        {
+          "pred_date": "2022-04-01",
+          "code": "91760",
+          "other_on_pred": true,
+          "last_listed": "2022-05-02"
+        },
+        {
+          "pred_date": "2022-04-28",
+          "code": "91760",
+          "other_on_pred": true,
+          "last_listed": "2022-05-02"
+        },
+        {
+          "pred_date": "2023-12-01",
+          "code": "14000",
+          "other_on_pred": true,
+          "last_listed": "2023-12-29"
+        },
+        {
+          "pred_date": "2023-12-22",
+          "code": "24020",
+          "other_on_pred": true,
+          "last_listed": "2024-01-26"
+        },
+        {
+          "pred_date": "2024-01-19",
+          "code": "24020",
+          "other_on_pred": true,
+          "last_listed": "2024-01-26"
+        },
+        {
+          "pred_date": "2024-11-29",
+          "code": "57590",
+          "other_on_pred": true,
+          "last_listed": "2024-12-27"
+        }
+      ]
+    }
+  }
+}

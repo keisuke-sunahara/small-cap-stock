@@ -122,6 +122,22 @@ def main() -> None:
              and w.pred >= 0]
     preds = np.array([w.pred for w in weeks])
     n_other = (u[preds] & other[preds]).sum(axis=1)
+    # 除外した場合に外れる銘柄の数（毎週）。100株を買える銘柄（指値 ≤ 予算）に限った数も出す
+    budget = cfg["capital"]["initial_capital_jpy"] / cfg["capital"]["n_holdings"]
+    lot = cfg["order"]["lot_size"]
+    affordable = m.C[preds] * (1 + cfg["order"]["limit_up_pct"]) * lot <= budget
+    n_other_aff = (u[preds] & other[preds] & affordable).sum(axis=1)
+    years = pd.Series(m.dates[preds]).str[:4]
+    res["excluded_per_week"] = {
+        "universe": {"mean": float(n_other.mean()), "median": float(np.median(n_other)),
+                     "p90": float(np.quantile(n_other, 0.9)), "max": int(n_other.max()),
+                     "share_of_universe_mean": float((n_other / u[preds].sum(axis=1)).mean()),
+                     "by_year_mean": pd.Series(n_other).groupby(years).mean().round(2).to_dict()},
+        "affordable_at_n": {"mean": float(n_other_aff.mean()), "median": float(np.median(n_other_aff)),
+                            "p90": float(np.quantile(n_other_aff, 0.9)), "max": int(n_other_aff.max()),
+                            "share_of_affordable_mean": float(
+                                (n_other_aff / (u[preds] & affordable).sum(axis=1)).mean())},
+    }
     rows = [(p, j) for p in preds for j in np.flatnonzero(u[p] & other[p])]
     ok = [(p, j) for p, j in rows if p + WINDOW <= T - 1]
     dl = [(m.last_listed[j] < T - 1) and (m.last_listed[j] <= p + WINDOW) for p, j in ok]
