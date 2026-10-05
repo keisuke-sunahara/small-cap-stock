@@ -1,0 +1,102 @@
+{
+ "experiment": "EXP-002",
+ "threshold": 0.98,
+ "light_years": 5,
+ "note": "成績は計算していない。学習の行の特徴量・ユニバースを Light の範囲で作り直した場合の、点数の順位相関だけ",
+ "months": [
+  {
+   "month": "2023-10",
+   "retrain_date": "2023-10-06",
+   "light_start": "2018-10-06",
+   "train_first": "2019-10-07",
+   "train_last": "2023-09-28",
+   "train_rows_full": 1071238,
+   "train_rows_light": 1071238,
+   "score_days": 8,
+   "score_rows": 9719,
+   "rank_corr_by_day": {
+    "2023-10-06": 0.9997947277296748,
+    "2023-10-12": 0.9998122005296546,
+    "2023-10-13": 0.999793584507577,
+    "2023-10-19": 0.9998133244591156,
+    "2023-10-20": 0.9998298673798014,
+    "2023-10-26": 0.9998199391811526,
+    "2023-10-27": 0.9998066921242194,
+    "2023-11-01": 0.9997978630611027
+   },
+   "rank_corr_min": 0.999793584507577,
+   "rank_corr_mean": 0.9998085248715373,
+   "rank_corr_all_rows": 0.9998322094252947,
+   "full_matches_saved_scores_max_abs_diff": 0.0,
+   "universe_rows_differ_in_train": 0,
+   "features_differ_on_retrain_date": {
+    "vol_ratio_5_60": 236
+   },
+   "universe_differs_on_retrain_date": 0,
+   "elapsed_sec": 161.8
+  },
+  {
+   "month": "2024-10",
+   "retrain_date": "2024-10-04",
+   "light_start": "2019-10-04",
+   "train_first": "2020-10-05",
+   "train_last": "2024-09-26",
+   "train_rows_full": 1087069,
+   "train_rows_light": 1087069,
+   "score_days": 8,
+   "score_rows": 7581,
+   "rank_corr_by_day": {
+    "2024-10-04": 0.9999820752690242,
+    "2024-10-10": 0.9999845409965655,
+    "2024-10-11": 0.9999845771541834,
+    "2024-10-17": 0.9999841951990907,
+    "2024-10-18": 0.9999869594427683,
+    "2024-10-24": 0.9999840709673163,
+    "2024-10-25": 0.9999847450563351,
+    "2024-10-31": 0.9999879978727456
+   },
+   "rank_corr_min": 0.9999820752690242,
+   "rank_corr_mean": 0.9999848952447536,
+   "rank_corr_all_rows": 0.9999916266012032,
+   "full_matches_saved_scores_max_abs_diff": 0.0,
+   "universe_rows_differ_in_train": 0,
+   "features_differ_on_retrain_date": {
+    "vol_ratio_5_60": 213
+   },
+   "universe_differs_on_retrain_date": 0,
+   "elapsed_sec": 163.4
+  },
+  {
+   "month": "2025-09",
+   "retrain_date": "2025-09-05",
+   "light_start": "2020-09-05",
+   "train_first": "2021-09-06",
+   "train_last": "2025-08-28",
+   "train_rows_full": 1065583,
+   "train_rows_light": 1065583,
+   "score_days": 6,
+   "score_rows": 7012,
+   "rank_corr_by_day": {
+    "2025-09-05": 0.9999015330177852,
+    "2025-09-11": 0.9999026838105701,
+    "2025-09-12": 0.9998913305202072,
+    "2025-09-18": 0.9998992294834376,
+    "2025-09-19": 0.9999018469227099,
+    "2025-09-25": 0.9998942132808025
+   },
+   "rank_corr_min": 0.9998913305202072,
+   "rank_corr_mean": 0.999898472839252,
+   "rank_corr_all_rows": 0.9999158282276706,
+   "full_matches_saved_scores_max_abs_diff": 0.0,
+   "universe_rows_differ_in_train": 0,
+   "features_differ_on_retrain_date": {
+    "vol_ratio_5_60": 249
+   },
+   "universe_differs_on_retrain_date": 0,
+   "elapsed_sec": 164.0
+  }
+ ],
+ "min_rank_corr": 0.999793584507577,
+ "pass": true,
+ "decision": "案B のまま進める（すべての月で 0.98 以上）"
+}

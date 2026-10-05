@@ -1,0 +1,53 @@
+{
+ "order": [
+  "EXP-002",
+  "EXP-001",
+  "EXP-004"
+ ],
+ "candidates": [
+  "EXP-002",
+  "EXP-001"
+ ],
+ "excluded": {
+  "EXP-004": "採用候補の条件を満たさない"
+ },
+ "t_min": 2.0,
+ "by_cost": {
+  "cost_0.3%": {
+   "selected": "EXP-002",
+   "steps": [
+    {
+     "model": "EXP-001",
+     "t_vs_simpler": {
+      "EXP-002": 1.7655364610924302
+     },
+     "chosen": false
+    },
+    {
+     "model": "EXP-002",
+     "t_vs_simpler": {},
+     "chosen": true
+    }
+   ]
+  },
+  "cost_tick": {
+   "selected": "EXP-002",
+   "steps": [
+    {
+     "model": "EXP-001",
+     "t_vs_simpler": {
+      "EXP-002": 1.5038218765162696
+     },
+     "chosen": false
+    },
+    {
+     "model": "EXP-002",
+     "t_vs_simpler": {},
+     "chosen": true
+    }
+   ]
+  }
+ },
+ "selected": "EXP-002",
+ "decision": "EXP-002 に決める（一律0.3%と銘柄ごとのコストで同じ）"
+}
