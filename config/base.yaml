@@ -87,6 +87,45 @@ features:
   set: all_v1                 # src/features/registry.py の FEATURE_SETS
   normalize: rank             # 予測日ごとにユニバース内の順位（0〜1）に直す
 
+# フェーズ4のモデル（2026-10-05 追加。実験は experiments/EXP-xxx/config.yaml に差分だけを書く。experiments/README.md）
+model:
+  type: lightgbm              # lightgbm / ridge
+  objective: regression       # lightgbm の目的：regression（順位の二乗誤差）/ lambdarank（日ごとの10分位を順位付け）
+  target_shuffle: false       # true：学習用の目的変数を起点の日ごとに並べ替える（情報漏れの確認用。EXP-003）
+  train_universe: all         # all / affordable（100株を買える銘柄だけで学習・順位付け。候補8）
+  lightgbm:                   # 調整しない固定値（結果を見て変えない）
+    n_estimators: 300
+    learning_rate: 0.05
+    num_leaves: 31
+    min_data_in_leaf: 1000
+    feature_fraction: 0.8
+    bagging_fraction: 0.8
+    bagging_freq: 1
+    lambda_l2: 1.0
+    num_threads: 4
+    deterministic: true
+    lambdarank_truncation_level: 30
+  ridge:
+    alpha: 1.0
+    nan_fill: 0.5             # 順位に直した特徴量の欠損は中央（0.5）で埋める
+
+# 比較する売買ルールの候補（CLAUDE.md 第5章）。初期値は基本ルール（候補を使わない）
+rules:
+  market_filter_ma_days: null # 候補1：TOPIX の終値がこの日数の移動平均を下回ったら買わず、継続もしない（20）
+  stop_loss: null             # 候補2：買値からこの割合の下落で逆指値の売り（0.08）
+  earnings_avoid: false       # 候補3：保有期間中に決算発表の予定がある銘柄を除く
+  earnings_avoid_undecided: true  # 候補3で、予定日が「未定」の銘柄も除く（EXP-008 の plan.md）
+  buy_order: limit            # 候補4：limit（寄付の指値）/ market（寄付の成行）
+  weighting: equal            # 候補6・7：equal / rank（順位による傾斜）/ inverse_vol（値動きの大きさに反比例）
+  rank_weights: [0.40, 0.35, 0.25]
+  max_weight: 0.5             # 1銘柄の配分の上限（候補6・7）
+  holding_weeks: 1            # 候補9：予測と買いを H 週ごとに行う（2・4）
+
+# 評価（フェーズ4。CLAUDE.md 第9章）
+evaluation:
+  data_cost_annual_jpy: 19800 # 運用時のプラン（Light、月1,650円）の年間データ費用。30万円に対して年6.6%
+  top_quantiles: 10           # 予測の分位ごとの成績（10分位）
+
 market:
   # 大引けの時刻（開示の利用開始日の判定に使う）
   close_time_change_date: "2024-11-05"

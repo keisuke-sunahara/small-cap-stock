@@ -1,0 +1,3 @@
+# EXP-003：目的変数の並べ替え（情報漏れの確認）。config/base.yaml との差分だけを書く（experiments/README.md）
+model:
+  target_shuffle: true

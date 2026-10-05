@@ -1,0 +1,3 @@
+# EXP-004：LightGBM（lambdarank：順位付けの学習）。config/base.yaml との差分だけを書く（experiments/README.md）
+model:
+  objective: lambdarank

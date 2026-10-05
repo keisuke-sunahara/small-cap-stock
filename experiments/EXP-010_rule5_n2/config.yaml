@@ -1,0 +1,5 @@
+# EXP-010：候補5：保有銘柄数 N = 2（参考）。config/base.yaml との差分だけを書く（experiments/README.md）
+# モデル：確定したモデルの実験ID を、モデルの確定の後に書く（判断基準は変えない）
+model_experiment: null
+capital:
+  n_holdings: 2

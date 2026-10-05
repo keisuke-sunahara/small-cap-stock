@@ -1,0 +1,3 @@
+# EXP-005：LightGBM（学習期間を拡大窓）。config/base.yaml との差分だけを書く（experiments/README.md）
+validation:
+  train_window: expanding

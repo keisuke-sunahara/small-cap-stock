@@ -1,0 +1,3 @@
+# EXP-001：LightGBM（回帰）・基本の方法。config/base.yaml との差分だけを書く（experiments/README.md）
+# base.yaml のまま（LightGBM の回帰、all_v1、直近4年のローリング、基本ルール）
+{}

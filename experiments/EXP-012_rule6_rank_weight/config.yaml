@@ -1,0 +1,6 @@
+# EXP-012：候補6：順位による傾斜配分（条件付き）。config/base.yaml との差分だけを書く（experiments/README.md）
+# モデル：確定したモデルの実験ID を、モデルの確定の後に書く（判断基準は変えない）
+model_experiment: null
+rules:
+  weighting: rank
+  rank_weights: [0.40, 0.35, 0.25]

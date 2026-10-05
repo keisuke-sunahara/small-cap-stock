@@ -1,0 +1,3 @@
+# EXP-002：線形モデル（リッジ回帰）。config/base.yaml との差分だけを書く（experiments/README.md）
+model:
+  type: ridge
