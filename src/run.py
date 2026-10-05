@@ -31,7 +31,7 @@ from src.backtest import evaluate as ev
 from src.backtest.engine import Backtester, Rules
 from src.backtest.market import JST, Market
 from src.config import ROOT, deep_merge, find_experiment_dir, load_config
-from src.models.walkforward import ScoreTable, affordable_mask, walk_forward_scores
+from src.models.walkforward import ScoreTable, affordable_mask, empty_score_days, walk_forward_scores
 
 TRAIN_KEYS = ("model", "features", "validation", "target", "universe", "project")
 
@@ -170,7 +170,9 @@ def run_experiment(exp_id: str, cfg: dict, model_cfg: dict | None, model_exp: st
     else:
         scores = pd.read_parquet(log_root / model_exp / "scores.parquet")
         metrics["model"] = {"scores_from": f"logs/backtest/{model_exp}/scores.parquet"}
-    st = ScoreTable(m, scores)
+    empty = empty_score_days(m, cfg, inp.u)        # 2020-10-01（終日の売買停止）など
+    metrics["meta"]["empty_score_days"] = [str(m.dates[t]) for t in empty]
+    st = ScoreTable(m, scores, empty)
     s_pred = st.matrix([w.pred for w in ctx.weeks])
 
     # 予測の評価
@@ -182,7 +184,7 @@ def run_experiment(exp_id: str, cfg: dict, model_cfg: dict | None, model_exp: st
         aff_rows = (inp.u & affordable_mask(m, cfg))[[w.pred for w in ctx.weeks]]
         metrics["rank_ic_affordable"] = {"this": ev.rank_ic_stats(ctx, s_pred, aff_rows)}
         if model_exp is not None:
-            sm = ScoreTable(m, pd.read_parquet(log_root / model_exp / "scores.parquet"))
+            sm = ScoreTable(m, pd.read_parquet(log_root / model_exp / "scores.parquet"), empty)
             metrics["rank_ic_affordable"][model_exp] = ev.rank_ic_stats(ctx, sm.matrix([w.pred for w in ctx.weeks]),
                                                                         aff_rows)
 
@@ -229,7 +231,7 @@ def run_experiment(exp_id: str, cfg: dict, model_cfg: dict | None, model_exp: st
     # 売買ルールの候補：確定したモデル ＋ 基本ルールとの比較
     base_weekly = None
     if model_exp is not None:
-        st_model = st if not trained else ScoreTable(m, pd.read_parquet(log_root / model_exp / "scores.parquet"))
+        st_model = st if not trained else ScoreTable(m, pd.read_parquet(log_root / model_exp / "scores.parquet"), empty)
         base_grid = ev.run_backtests(base_ctx, st_model, model_cfg)
         base_metrics, base_weekly = ev.summarize_grid(base_ctx, base_grid)
         metrics["compared_with"] = {"label": f"{model_exp} ＋ 基本ルール",

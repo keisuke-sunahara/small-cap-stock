@@ -110,6 +110,28 @@ def test_score_days_and_model_assignment():
         st(0)
 
 
+def test_score_day_with_empty_universe():
+    """点数を付ける日のユニバースが空（2020-10-01 の終日の売買停止など）なら点数の行は無く、その日はすべて NaN として扱う。"""
+    from src.models.walkforward import empty_score_days
+    m, u, feats = dummy_env()
+    cfg = small_cfg(m.dates)
+    sd = score_days(m, cfg)
+    tc = int(sd[sd["kind"] == "cont"]["t"].iloc[3])
+    u2 = u.copy()
+    u2[tc] = False
+    sc = walk_forward_scores(m, u2, feats, cfg, None, log=None).scores
+    assert str(m.dates[tc]) not in set(sc["date"])
+    with pytest.raises(KeyError):
+        ScoreTable(m, sc)(tc)
+    assert empty_score_days(m, cfg, u2) == [tc] and empty_score_days(m, cfg, u) == []
+    st = ScoreTable(m, sc, empty_score_days(m, cfg, u2))
+    assert np.isnan(st(tc)).all()
+    with pytest.raises(KeyError):
+        st(0)                                        # 点数を付ける日でない日は、これまでどおりエラー
+    with pytest.raises(ValueError):
+        ScoreTable(m, sc, [int(sd["t"].iloc[0])])    # 点数がある日を空の日として渡したらエラー
+
+
 @pytest.mark.parametrize("model", [{"type": "lightgbm", "objective": "regression"}, {"type": "ridge"}])
 def test_no_future_information_in_scores(model):
     """日 X 以降の株価と特徴量を変えても、X より前に付けた点数（X より前に学習を始めた月のモデル）は変わらない。"""

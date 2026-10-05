@@ -34,6 +34,11 @@ def eval_weeks(m: Market, cfg: dict) -> list[Week]:
     return [w for w in make_weeks(m.dates) if w.pred >= 0 and m.dates[w.first] >= start and m.dates[w.last] <= end]
 
 
+def empty_score_days(m: Market, cfg: dict, universe: np.ndarray) -> list[int]:
+    """点数を付ける日のうち、ユニバースが空の日（点数の行が無い日）。"""
+    return [int(t) for t in score_days(m, cfg)["t"] if not universe[t].any()]
+
+
 def score_days(m: Market, cfg: dict) -> pd.DataFrame:
     """点数を付ける日（列 t・kind）。"""
     kinds: dict[int, set[str]] = {}
@@ -154,9 +159,13 @@ def walk_forward_scores(m: Market, universe: np.ndarray, feats: dict[str, np.nda
 
 
 class ScoreTable:
-    """保存した点数（date・code・score）を、engine の点数の関数（日付の位置 → [N]）にする。点数の無い日はエラー。"""
+    """保存した点数（date・code・score）を、engine の点数の関数（日付の位置 → [N]）にする。点数の無い日はエラー。
 
-    def __init__(self, m: Market, scores: pd.DataFrame):
+    empty_days：点数を付ける日のうち、ユニバースが空で点数の行が無い日（2020-10-01 の終日の売買停止など）。この日は点数が
+    すべて NaN（順位に入る銘柄が無い）とする。ベースラインの計算と同じく、継続の判断の「上位N」が空になり、保有銘柄は売る
+    """
+
+    def __init__(self, m: Market, scores: pd.DataFrame, empty_days=()):
         self.n = len(m.codes)
         self.by_t: dict[int, np.ndarray] = {}
         t = scores["date"].map(m.date_index).to_numpy()
@@ -167,6 +176,10 @@ class ScoreTable:
             arr = np.full(self.n, np.nan)
             arr[j[idx]] = scores["score"].to_numpy()[idx]
             self.by_t[int(tt)] = arr
+        for t in empty_days:
+            if int(t) in self.by_t:
+                raise ValueError(f"ユニバースが空の日に点数があります（位置 {t}）")
+            self.by_t[int(t)] = np.full(self.n, np.nan)
 
     def __call__(self, t: int) -> np.ndarray:
         if t not in self.by_t:
