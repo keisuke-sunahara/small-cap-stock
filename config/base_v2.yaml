@@ -2,6 +2,7 @@
 # 実験の config.yaml は、この設定との差分だけを書く（experiments/README_v2.md）。
 # ルールの文章は docs/CLAUDE_v2_draft.md 第5章、決めた理由は docs/PLAN_v2.md・docs/DECISIONS.md。
 # まだ実装していないキーを含む（フェーズ v2-1 で実装する）。data.holdout_start（2025-09-29）は変えない。
+# 2026-10-06：評価役の v2 の計画の確認（判定「条件付き」）を反映（sell_to_first_buy_bdays、ユニバース平均の2つの窓、Standard の費用、合否に使わない指標・ストレステスト）。
 
 version: v2
 
@@ -16,6 +17,10 @@ cycle:
   # かぶミニの成行の買いはストップ高の値段で余力を拘束するため、2段階で買う（案B。2026-10-05 承認）。
   # 2：第2営業日（1段目）と第3営業日（2段目、1段目で約定した銘柄の買い増し）
   buy_stages: 2
+  # 売りの日 S から1段目の買いの日 B までの営業日数（2段目は B の翌営業日）。主は1。
+  # かぶミニの売りの代金を、売った日の夜に出す翌営業日の買い注文に使えるかを楽天証券に問い合わせ中（2026-10-05）。回答が「使えない」なら2に改める。
+  # v2-2 の実験の実行の前に確定し、実行の後は変えない。2に改めても目的変数（target.entry_offset 2）は変えない
+  sell_to_first_buy_bdays: 1
   first_prediction_date: "2018-09-28"
   last_prediction_date: "2025-07-31"   # 2025-08-29 は総資産の評価の区切りだけ（売りの日がホールドアウトに入る）
 
@@ -75,11 +80,17 @@ production:
 # v1 の売買ルールの候補は使わない（すべて base.yaml の初期値のまま）
 
 evaluation:
-  data_cost_annual_jpy: 19800       # J-Quants Light の年間費用。50万円で年3.96%
+  data_cost_annual_jpy: 19800       # J-Quants Light の年間費用。50万円で年3.96%（判定に使う）
+  data_cost_annual_jpy_standard: 39600   # Standard のままの場合（50万円で年7.92%）。基準 B・C・G をこの値でも満たすかを併記する（合否は Light）
+  # ユニバース平均の2つの窓（CLAUDE_v2_draft.md 第5章「ベースライン」）
+  #   month_end：P_k の引け → P_{k+1} の引け（約定の判定なし）。戦略・ランダム・モメンタム・リバーサルの超過、基準 C・D・E、7.4ポイントの N=20 の側
+  #   holding：B の寄付 → S' の寄付（約定の判定あり）。上位20%（基準 B・H）・5分位
+  universe_mean_benchmark_strategy: month_end
+  universe_mean_benchmark_top_fraction: holding
   random_runs: 1000                 # ランダムのベースライン（乱数シード0〜999）
-  top_fraction_gate: 0.20           # 基準B：点数の上位20%（コストなし）の年率の超過リターン（上位20%の年率 − ユニバース平均の年率）≥ データ費用の割合、かつ月ごとの超過の t値 ≥ 2
+  top_fraction_gate: 0.20           # 基準B：点数の上位20%（コストなし）の年率の超過リターン（上位20%の年率 − ユニバース平均（保有の窓）の年率）≥ データ費用の割合、かつ月ごとの超過の t値 ≥ 2
   top_fraction_gate_t: 2.0
-  luck_flag_margin: 0.074           # N=20 の年率の超過が上位20%の年率の超過を7.4ポイント以上上回ったら、幸運か情報漏れを疑う（標準誤差3.7%の2倍）
+  luck_flag_margin: 0.074           # N=20 の年率の超過（月末の窓）が上位20%の年率の超過（保有の窓）を7.4ポイント以上上回ったら、幸運か情報漏れを疑う（標準誤差3.7%の2倍。窓の違いのずれを含む）
   paper_top20_buyable_min: 0.75     # 基準 I-1：ペーパートレードの期間の平均で、上位20銘柄のうちかぶミニで買えた割合の下限（2026-10-05 決定）
   quantiles: 5                      # 予測の5分位ごとの月の平均リターン
   trial_count_start: 4              # v1 の試行回数（EXP-001・002・004・005）から通算で数える
@@ -87,3 +98,16 @@ evaluation:
   half_split_year: 2022             # 前半 2018〜2021、後半 2022〜2025
   # ベースライン（同じ月次・N=20・バッファ）：random, momentum_20d, reversal_5d, universe_mean, topix_buy_and_hold
   baselines: [random, momentum_20d, reversal_5d, universe_mean, topix_buy_and_hold]
+
+# 合否に使わない指標とストレステスト（experiments/README_v2.md 第3章。2026-10-06）
+diagnostics:
+  open_gap_threshold: 0.10          # 9:30 の失効の感度：始値が前の営業日の終値から ±10% 以上離れた約定を数え、約定しないとした場合の年率も出す
+  skip_month_fraction: 0.10         # 1割の月の買いを見送る（83か月のうち8か月）
+  skip_month_seeds: 100             # 乱数シード0〜99
+  concentration_threshold: 0.10     # 月末の銘柄比率がこれを超えた月数
+  stress_cost_one_way: 0.0044       # コスト0.44%
+  stress_adverse_price: mid_open_extreme   # 買い（始値 + 高値）÷ 2、売り（始値 + 安値）÷ 2
+  stress_drawdown_months: ["2020-02", "2020-03", "2024-08"]   # 期間の終わり P_{k+1} の年月
+  stress_start_shifts: 12           # 最初の予測日を P_0〜P_11 にずらす
+  bootstrap_runs: 10000             # 月ごとの組の復元抽出（乱数シード0）
+  bootstrap_seed: 0
