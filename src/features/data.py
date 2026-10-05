@@ -68,8 +68,8 @@ def prepare_sched(raw: pd.DataFrame, m: Market) -> pd.DataFrame:
 
 def load_feature_data(m: Market, cfg: dict, end_date: str | None = None) -> FeatureData:
     """end_date を指定すると、その日までに開示・公表された記録だけを使う（未来情報の混入テスト用）。"""
-    fins = read_raw(cfg, "summary", end=end_date, columns=FIN_COLUMNS)
-    sched = read_raw(cfg, "earnings_date", end=end_date, columns=SCHED_COLUMNS)
+    fins = read_raw(cfg, "summary", start=cfg["data"]["start_date"], end=end_date, columns=FIN_COLUMNS)
+    sched = read_raw(cfg, "earnings_date", start=cfg["data"]["start_date"], end=end_date, columns=SCHED_COLUMNS)
     return FeatureData(m=m, cfg=cfg, fins=prepare_fins(fins, m, cfg), sched=prepare_sched(sched, m))
 
 

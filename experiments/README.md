@@ -97,6 +97,8 @@
 
 - `experiments/EXP-xxx_*/`：plan.md（実行前）、config.yaml（実行前）、results.md、metrics.json
 - `logs/backtest/<実験ID>/scores.parquet`：点数を付けた日（予測日・継続の判断の日）のユニバースの全銘柄の点数（date・code・kind・score）。売買ルールの候補のうち、点数が確定したモデルと同じ実験（EXP-006〜013・015・016）は保存せず、モデルの実験の点数を参照する（同じデータを重ねて溜めないため）
-- `logs/backtest/<実験ID>/weekly.csv`・`orders.csv`・`trades.csv`（予算固定・一律0.3%の売買の記録）
+- `logs/backtest/<実験ID>/weekly.csv`・`orders.csv`・`trades.csv`（予算固定・一律0.3%の売買の記録）（候補9は開始週ごとに offset の列）
+- `logs/backtest/<実験ID>/weekly_returns.csv`：予算の決め方 × コストごとの週次リターン（`src/compare.py` で使う）。売買ルールの候補は、比べた相手（確定したモデル ＋ 基本ルール）の分を `weekly_returns_compared.csv` に保存する。学習した実験は月ごとの学習の範囲を `splits.csv` に保存する
+- `logs/backtest/random/random_runs.csv`：ランダム（乱数シード0〜999、基本ルール）の年率の超過リターン（分布の中での位置の計算用。最初の実験の実行時に1回だけ計算し、平均が `reports/phase3r_baselines.json` と一致することを確かめる）
 - 特徴量の値（正規化の前）は、特徴量のセットごとに1回だけ `logs/backtest/features/all_v1.parquet` に保存した（評価役の依頼4。予測日364日のユニバース）
 - 学習済みモデルは `models/<実験ID>/`（コミットしない）

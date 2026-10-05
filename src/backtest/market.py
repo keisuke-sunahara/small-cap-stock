@@ -162,7 +162,11 @@ def share_basis(s: pd.DataFrame, cumF: np.ndarray, tol: float | None, before_day
 
 
 def build_market(cfg: dict, end: str | None = None) -> Market:
-    """end を指定すると、その日までのデータだけで作る（未来情報の混入テスト用。期間の終わりより後は指定できない）。"""
+    """end を指定すると、その日までのデータだけで作る（未来情報の混入テスト用。期間の終わりより後は指定できない）。
+
+    開始日は cfg["data"]["start_date"]。銘柄一覧・株価・開示はその日以降の記録だけを読む（運用時の Light プランの
+    「5年前まで」を再現する確認用。src/analysis/phase4_light_check.py。通常の開始日より前のファイルは無いので、通常は変わらない）
+    """
     start, period_end = _period(cfg)
     end = period_end if end is None else min(end, period_end)
     cal = read_raw(cfg, "calendar")
@@ -170,7 +174,7 @@ def build_market(cfg: dict, end: str | None = None) -> Market:
     di = {d: i for i, d in enumerate(bdays)}
     T = len(bdays)
 
-    master = read_raw(cfg, "master", end=end, columns=["Code", "Mkt", "ProdCat", "Mrgn"])
+    master = read_raw(cfg, "master", start=start, end=end, columns=["Code", "Mkt", "ProdCat", "Mrgn"])
     master["Code"] = master["Code"].astype(str)
     master["is_common"] = is_common(master)
     codes = np.array(sorted(master.loc[master["is_common"], "Code"].unique()))
@@ -186,7 +190,7 @@ def build_market(cfg: dict, end: str | None = None) -> Market:
     last_listed = np.full(N, -1, dtype=np.int64)
     np.maximum.at(last_listed, mj, mi)
 
-    bars = read_raw(cfg, "bars", end=end, columns=["Code", "O", "H", "L", "C", "Va", "Vo", "UL", "LL", "AdjFactor"])
+    bars = read_raw(cfg, "bars", start=start, end=end, columns=["Code", "O", "H", "L", "C", "Va", "Vo", "UL", "LL", "AdjFactor"])
     bars["Code"] = bars["Code"].astype(str)
     bars = bars[bars["Code"].isin(ci)]
     bi = bars["Date"].map(di).to_numpy()
@@ -209,7 +213,7 @@ def build_market(cfg: dict, end: str | None = None) -> Market:
     del bars
     cumF = np.cumprod(adj, axis=0)
 
-    s = read_raw(cfg, "summary", end=end, columns=["Code", "DiscTime", "ShOutFY", "CurPerEn"])
+    s = read_raw(cfg, "summary", start=start, end=end, columns=["Code", "DiscTime", "ShOutFY", "CurPerEn"])
     s["Code"] = s["Code"].astype(str)
     s = s[s["Code"].isin(ci) & (s["ShOutFY"].astype(str).str.strip() != "")].copy()
     s["sh"] = pd.to_numeric(s["ShOutFY"], errors="coerce")

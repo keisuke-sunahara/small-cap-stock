@@ -71,3 +71,51 @@ def close_sell_filled(close: float, low: float, limit_down_flag: bool) -> bool:
 def open_sell_filled(open_price: float) -> bool:
     """売れ残りを始値で売る。寄らなかった日は売れない。"""
     return open_price == open_price
+
+
+def market_buy_filled(open_price: float, high: float, limit_up_flag: bool, adj_factor: float = 1.0) -> bool:
+    """寄付の成行の買いが約定したか（比較する売買ルールの候補4。EXP-009 の plan.md）。
+
+    - 寄らなかった（始値が NaN）→ 約定しない
+    - 買う日の朝に分割・併合が効く → 約定しない（注文の株数が分割前の基準のため。指値と同じ）
+    - 始値がストップ高（ストップ高のフラグがあり、始値がその日の高値と同じ）→ 比例配分で買えないことがあるため、約定しない（保守的）
+    """
+    if open_price != open_price:
+        return False
+    if abs(adj_factor - 1.0) > EPS:
+        return False
+    if limit_up_flag and open_price >= high - EPS:
+        return False
+    return True
+
+
+def stop_price(buy_price: float, stop_loss: float) -> float:
+    """損切りの逆指値の価格 = 買値 × (1 − stop_loss) を呼値の単位に合わせて切り下げた価格（候補2。EXP-007 の plan.md）。"""
+    return floor_to_tick(buy_price * (1 - stop_loss))
+
+
+def stop_triggered(open_price: float, low: float, stop: float, bought_today: bool) -> float | None:
+    """損切りの逆指値が約定する価格（約定しなければ None）。日足で判定する。
+
+    - 始値が無い日（売買不成立・ストップ安で寄らない）は売れない（次の営業日に同じ判定をする）
+    - 買った日：始値（買値）より後の値動きなので、安値 ≤ 逆指値の価格なら逆指値の価格で売る
+    - それ以外の日：始値 ≤ 逆指値の価格なら始値で売る（窓を開けて下回った）。そうでなく安値 ≤ 逆指値の価格なら逆指値の価格
+    """
+    if open_price != open_price:
+        return None
+    if not bought_today and open_price <= stop + EPS:
+        return open_price
+    if low == low and low <= stop + EPS:
+        return stop
+    return None
+
+
+def limit_price_array(prev_close: "np.ndarray", limit_up_pct: float) -> "np.ndarray":
+    """limit_price の配列版（NaN は NaN）。結果は limit_price と同じ（tests/test_execution.py で確認する）。"""
+    import numpy as np
+    raw = np.asarray(prev_close, dtype=float) * (1 + limit_up_pct)
+    tick = np.full(raw.shape, float(TICK_ABOVE))
+    for upper, t in reversed(TICK_TABLE):
+        tick = np.where(raw <= upper + EPS, float(t), tick)
+    with np.errstate(invalid="ignore"):
+        return np.floor(raw / tick + EPS) * tick

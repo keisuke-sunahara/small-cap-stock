@@ -82,3 +82,34 @@ def test_disclosure_available_index():
     ], columns=["DiscDate", "DiscTime"])
     got = available_index(df["DiscDate"], df["DiscTime"], bdays, CFG_MARKET)
     assert got.tolist() == [0, 1, 1, 1, 2, 1, 3, 4]
+
+
+def test_limit_price_array_matches_scalar():
+    from src.backtest.execution import limit_price_array
+    rng = np.random.default_rng(0)
+    prices = np.concatenate([rng.uniform(30, 60_000, 5000), [2941.0, 2942.0, 4901.0, 29411.0, np.nan],
+                             np.array([3000, 5000, 30000, 50000]) / 1.02])
+    got = limit_price_array(prices, 0.02)
+    want = np.array([limit_price(p, 0.02) if p == p else np.nan for p in prices])
+    assert np.array_equal(got, want, equal_nan=True)
+
+
+def test_market_buy_filled():
+    from src.backtest.execution import market_buy_filled
+    assert market_buy_filled(520.0, 530.0, False)              # 指値（前日の終値 + 2%）を超えて始まっても買える
+    assert not market_buy_filled(float("nan"), float("nan"), False)
+    assert not market_buy_filled(580.0, 580.0, True)          # ストップ高で寄った（始値 = 高値）
+    assert market_buy_filled(570.0, 580.0, True)              # 寄った後にストップ高になった
+    assert not market_buy_filled(500.0, 510.0, False, adj_factor=0.5)
+
+
+def test_stop_price_and_trigger():
+    from src.backtest.execution import stop_price, stop_triggered
+    assert stop_price(500.0, 0.08) == 460.0
+    assert stop_price(3010.0, 0.08) == 2769.0                 # 2769.2 → 1円単位で切り下げ
+    assert stop_price(3500.0, 0.08) == 3220.0                 # 3220 は 5円単位
+    assert stop_triggered(470.0, 455.0, 460.0, False) == 460.0   # 場中に逆指値の価格に届いた
+    assert stop_triggered(450.0, 440.0, 460.0, False) == 450.0   # 窓を開けて下回った → 始値
+    assert stop_triggered(450.0, 440.0, 460.0, True) == 460.0    # 買った日は安値だけで判定
+    assert stop_triggered(470.0, 461.0, 460.0, False) is None
+    assert stop_triggered(float("nan"), float("nan"), 460.0, False) is None   # 寄らない日は売れない
