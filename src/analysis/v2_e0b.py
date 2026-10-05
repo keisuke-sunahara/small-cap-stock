@@ -1,20 +1,23 @@
 """v2 の E0b：かぶミニの今の取扱一覧（2026-10-05）での測り直し（2026-10-05 ユーザーの指示）。
 
 成績・Rank IC・目的変数・リターンは計算しない。使う株価のデータは 2025-09-26 以前だけ（Market）。
-今の一覧の CSV の「現在値」「前日比」の列（2026-10-05 の値。ホールドアウトの期間）は読まない。
+今の一覧の CSV の「現在値」「前日比」の列（2026-10-05 の値。ホールドアウトの期間）は読み込みの時点で捨てる。
+写し（logs/v2_e0/）は コード・銘柄名・市場 の3列だけにする（2026-10-05 ユーザーの指示）。
 
 (0) 照合：2024-12-17 の一覧（logs/v2_e0/kabumini_lineup_2024-12-17.csv の寄付取引○）と今の一覧
 (1) E0 (1) を今の一覧で：2025-09-26 のユニバースの割合（時価総額の帯と5分位、売買代金の帯と5分位）、各予測日に当てた割合（未来の情報を含む参考値）
 (2) v1 の EXP-002（リッジ）のコミット済みの点数（logs/backtest/EXP-002/scores.parquet）で、2024-10〜2025-09 の各月末以前の最後の予測日の
     点数の上位20銘柄と上位20%のうち、今の一覧・2024-12-17 の一覧で買える割合（点数を読むだけ。試行回数に数えない）
 
-実行：python -m src.analysis.v2_e0b
-出力：reports/v2_e0b.json、logs/v2_e0/kabumini_yoritsuki_2026-10-05.csv（ユーザーの CSV の写し）
+実行：python -m src.analysis.v2_e0b [--source external|copy]
+  external：data/external/ のユーザーの CSV（コミットしない。5列）から読み、3列の写しを logs/v2_e0/ に書く（既定。ファイルが無ければ copy）
+  copy：logs/v2_e0/ の3列の写しから読む（評価役の再現用。写しは書き換えない）
+出力：reports/v2_e0b.json、logs/v2_e0/kabumini_yoritsuki_2026-10-05.csv（ユーザーの CSV の3列の写し）
 """
 from __future__ import annotations
 
+import argparse
 import json
-import shutil
 from datetime import datetime
 
 import numpy as np
@@ -30,17 +33,28 @@ NEW_SRC = ROOT / "data" / "external" / f"kabumini_yoritsuki_{NEW_DATE}.csv"
 NEW_COPY = ROOT / "logs" / "v2_e0" / f"kabumini_yoritsuki_{NEW_DATE}.csv"
 OLD_LIST = ROOT / "logs" / "v2_e0" / "kabumini_lineup_2024-12-17.csv"
 SCORES = ROOT / "logs" / "backtest" / "EXP-002" / "scores.parquet"
-NEW_COLUMNS = ["コード", "銘柄名", "市場", "現在値", "前日比(%)"]
+NEW_COLUMNS = ["コード", "銘柄名", "市場", "現在値", "前日比(%)"]   # ユーザーが出力した CSV の列（記録用）
+KEEP_COLUMNS = ["コード", "銘柄名", "市場"]                          # 読み込みで残す列。価格の列は捨てる
 SCORE_MONTHS = [str(p) for p in pd.period_range("2024-10", "2025-09", freq="M")]
 TOP_N = 20
 TOP_FRAC = 0.2
 
 
-def read_new_list() -> pd.DataFrame:
-    head = pd.read_csv(NEW_SRC, encoding="utf-8-sig", nrows=0).columns.tolist()
-    assert head == NEW_COLUMNS, head
-    # 現在値・前日比（2026-10-05 の値）は読まない
-    df = pd.read_csv(NEW_SRC, encoding="utf-8-sig", dtype=str, usecols=["コード", "銘柄名", "市場"])
+def read_lineup(path) -> pd.DataFrame:
+    """かぶミニの取扱一覧を読む。コード・銘柄名・市場 の3列だけを残し、価格などの他の列は読み込みの時点で捨てる。"""
+    head = pd.read_csv(path, encoding="utf-8-sig", nrows=0).columns.tolist()
+    assert set(KEEP_COLUMNS) <= set(head), head
+    df = pd.read_csv(path, encoding="utf-8-sig", dtype=str, usecols=KEEP_COLUMNS)[KEEP_COLUMNS]
+    return df
+
+
+def read_new_list(source: str) -> pd.DataFrame:
+    df = read_lineup(NEW_SRC if source == "external" else NEW_COPY)
+    if source == "external":
+        # 3列の写しを書く（価格の列はここで捨てているので写しにも入らない）
+        NEW_COPY.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(NEW_COPY, index=False, encoding="utf-8-sig", lineterminator="\n")
+    df = df.copy()
     df.columns = ["code4", "name", "market"]
     assert df["code4"].str.fullmatch(r"[0-9][0-9A-Z]{2}[0-9A-Z]").all()
     assert not df["code4"].duplicated().any()
@@ -48,13 +62,15 @@ def read_new_list() -> pd.DataFrame:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--source", choices=["external", "copy"], default=None)
+    args = ap.parse_args()
+    source = args.source or ("external" if NEW_SRC.exists() else "copy")
     cfg = load_config()
     out: dict = {"created_at_jst": datetime.now(JST).isoformat(timespec="seconds")}
 
-    new = read_new_list()
+    new = read_new_list(source)
     old = pd.read_csv(OLD_LIST, dtype={"code4": str})
-    NEW_COPY.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(NEW_SRC, NEW_COPY)
     out["new_list"] = {
         "source": "楽天証券 スーパースクリーナー、種別「かぶミニ寄付」の出力（ユーザーが 2026-10-05 に取得）",
         "file": str(NEW_COPY.relative_to(ROOT)).replace("\\", "/"), "rows": int(len(new)),

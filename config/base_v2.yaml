@@ -69,6 +69,7 @@ model:
 production:
   skip_not_in_kabumini_lineup: true   # 予測日の取扱一覧（ユーザーがスーパースクリーナーで出力）に無い銘柄は飛ばして次の順位へ
   kabumini_lineup_glob: data/external/kabumini_yoritsuki_*.csv
+  kabumini_lineup_keep_columns: [コード, 銘柄名, 市場]   # 読み込みで残す列。現在値・前日比などの価格の列は読み込みの時点で捨てる（2026-10-05 決定）
   weekly_holdings_margin_check: true  # 週1回、保有銘柄の貸借信用区分が「その他」になったら月の途中でも売る（かぶミニで売れなければ買取請求）
 
 # v1 の売買ルールの候補は使わない（すべて base.yaml の初期値のまま）
@@ -76,10 +77,10 @@ production:
 evaluation:
   data_cost_annual_jpy: 19800       # J-Quants Light の年間費用。50万円で年3.96%
   random_runs: 1000                 # ランダムのベースライン（乱数シード0〜999）
-  top_fraction_gate: 0.20           # 基準B：点数の上位20%（コストなし）の年の超過リターンの平均 ≥ データ費用の割合、かつ月ごとの超過の t値 ≥ 2
+  top_fraction_gate: 0.20           # 基準B：点数の上位20%（コストなし）の年率の超過リターン（上位20%の年率 − ユニバース平均の年率）≥ データ費用の割合、かつ月ごとの超過の t値 ≥ 2
   top_fraction_gate_t: 2.0
   luck_flag_margin: 0.074           # N=20 の年率の超過が上位20%の年率の超過を7.4ポイント以上上回ったら、幸運か情報漏れを疑う（標準誤差3.7%の2倍）
-  paper_top20_buyable_min: null     # 基準 I：上位20銘柄のうちかぶミニで買えた割合の下限。【未定】ユーザーが E0b を見て決める（仮に0.70）
+  paper_top20_buyable_min: 0.75     # 基準 I-1：ペーパートレードの期間の平均で、上位20銘柄のうちかぶミニで買えた割合の下限（2026-10-05 決定）
   quantiles: 5                      # 予測の5分位ごとの月の平均リターン
   trial_count_start: 4              # v1 の試行回数（EXP-001・002・004・005）から通算で数える
   trial_count_limit: 10             # 10回を超えたら止める（基準 J）
