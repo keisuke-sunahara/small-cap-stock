@@ -240,10 +240,21 @@ def run_experiment(exp_id: str, cfg: dict, model_cfg: dict | None, model_exp: st
             metrics["rule_adoption"]["adopt"] = None
 
     main = grid["fixed"]["cost_0.3%"]
+    stop_low_weekly = None
     if rl.get("stop_loss"):
-        metrics["stop_loss"] = ev.stop_loss_stats(m, main[0].trades)
+        metrics["stop_loss"] = ev.stop_loss_stats(m, main[0])
+        # 参考：触れた日の安値で売れた場合（採用の判断には使わない。評価役のフェーズ4計画の指摘 中1）
+        cfg_low = deep_merge(cfg, {"rules": {"stop_fill": "low"}})
+        low_metrics, stop_low_weekly = ev.summarize_grid(ctx, ev.run_backtests(ctx, st, cfg_low))
+        ref = {b: {c: low_metrics[b][c] for c in ev.MAIN_COSTS} for b in ("fixed", "min_equity")}
+        if model_exp is not None:
+            ref["rule_adoption"] = ev.rule_adoption(low_metrics, stop_low_weekly, base_metrics, base_weekly)
+        ref["note"] = "参考：損切りに当たった日の安値で売れたとする計算。採用の判断には使わない"
+        metrics["stop_loss_reference_low"] = ref
     metrics["delisting_of_orders"] = ev.delisting_of_orders(m, main[0].orders)
     _save(exp_id, metrics, weekly, exp_dir, log_dir, ctx, main, log, t0, base_weekly)
+    if stop_low_weekly is not None:
+        stop_low_weekly.to_csv(log_dir / "weekly_returns_stop_low.csv", index=False)
     return metrics
 
 
@@ -315,13 +326,27 @@ def results_markdown(exp_id: str, mt: dict) -> str:
     if "leak_check" in mt:
         lc = mt["leak_check"]
         lines.append(f"- 情報漏れの確認（EXP-003）：{'見つからなかった' if lc['no_leak_found'] else '**疑われる（止めて報告）**'}"
-                     f"（Rank IC {'○' if lc['ic_ok'] else '×'}、ランダムの5〜95%点 {'○' if lc['random_ok'] else '×'}）")
+                     f"（Rank IC の t値の絶対値 < 2 {'○' if lc['ic_ok'] else '×'}、参考：平均の絶対値 < 0.005 "
+                     f"{'○' if lc.get('ic_mean_abs_below_0.005_reference') else '×'}、ランダムの5〜95%点 {'○' if lc['random_ok'] else '×'}）")
+        lines.append("  - 注意：目的変数を並べ替えるとモデルは特徴量と目的変数の関係を学べないので、この検定では**特徴量に混ざった未来の情報は"
+                     "見つからない**。見つけられるのは、学習と評価の分け方・ユニバース・評価や売買の計算の側の漏れ。特徴量の未来の情報は"
+                     "フェーズ3のテスト（予測日までのデータだけで作り直して照合）で確かめている")
     if "rule_adoption" in mt:
         ra = mt["rule_adoption"]
         adopt = {True: "採用", False: "不採用", None: "判断しない（参考）"}[ra["adopt"]]
         lines.append(f"- 売買ルールの候補（README 第5章）：{adopt}（年率の超過：" +
                      "、".join(f"{c} {_pct(v[0])} vs {_pct(v[1])}" for c, v in ra["excess"].items()) +
                      f"、週次の差の t値 {ra['weekly_diff_t']:.2f}（基準 {ra['t_min']}）、最大DD {_pct(ra['max_drawdown'][0])} vs {_pct(ra['max_drawdown'][1])}）")
+    if "stop_loss" in mt:
+        sl = mt["stop_loss"]
+        lines.append(f"- 損切り（予算固定・一律0.3%）：当たった {sl['stops']}件（買い {sl['buys']}件）、窓を開けた "
+                     f"{sl.get('gap', 0)}件（{_ratio(sl.get('gap_ratio'))}）、ストップ安に張り付いてその日に売れなかった "
+                     f"{sl.get('stuck_limit_down', 0)}件")
+    if "stop_loss_reference_low" in mt:
+        rl_ = mt["stop_loss_reference_low"]
+        lines.append("- 参考（触れた日の安値で売れた場合。判断には使わない）：予算固定の年率の超過 " +
+                     "、".join(f"{c} {_pct(rl_['fixed'][c]['annual_excess_vs_universe'])}" for c in ev.MAIN_COSTS) +
+                     (f"、採用の条件 {'満たす' if rl_['rule_adoption']['adopt'] else '満たさない'}" if "rule_adoption" in rl_ else ""))
     rp = mt["random_percentile"]
     lines.append(f"- ランダム（{mt.get('random_runs')}回）の分布の中での位置（年率の超過）：" +
                  "、".join(f"{b} {c} {rp[b][c] * 100:.1f}%点" for b in rp for c in rp[b]))

@@ -123,6 +123,13 @@ def test_rule_experiments(env, model_run, exp_id, diff, key):
     assert ra["t_min"] == 2.0
     if key:
         assert key in mt
+    if exp_id == "EXP-T07":
+        assert set(mt["stop_loss"]) >= {"stops", "buys"}
+        ref = mt["stop_loss_reference_low"]                                 # 参考：触れた日の安値で売れた場合
+        assert set(ref) >= {"fixed", "min_equity", "rule_adoption", "note"}
+        assert (env.root / "logs" / exp_id / "weekly_returns_stop_low.csv").exists()
+        # 安値で売る参考の計算は、逆指値の価格 − 1呼値 で売る計算より良くならない（同じ点数・同じ判定）
+        assert ref["fixed"]["cost_0.3%"]["annual_return"] <= mt["backtest"]["fixed"]["cost_0.3%"]["annual_return"] + 1e-12
     assert not (env.root / "logs" / exp_id / "scores.parquet").exists()   # 点数はモデルの実験のものを使う
     if exp_id in ("EXP-T06", "EXP-T08"):
         w = pd.read_csv(env.root / "logs" / exp_id / "weekly.csv", keep_default_na=False)
@@ -138,6 +145,8 @@ def test_rule_experiments(env, model_run, exp_id, diff, key):
     if exp_id == "EXP-T15":
         fixed = mt["backtest"]["fixed"]["cost_0.3%"]
         assert len(fixed["offsets"]) == 2 and "best_offset" in fixed
+        assert set(ra["better_excess_all_offsets"]) == {"cost_0.3%", "cost_tick"}
+        assert all(len(v) == 2 for v in ra["better_excess_all_offsets"].values())
         wr = pd.read_csv(env.root / "logs" / exp_id / "weekly_returns.csv")
         assert np.allclose(wr["fixed|cost_0.3%"], (wr["fixed|cost_0.3%|o0"] + wr["fixed|cost_0.3%|o1"]) / 2)
 
@@ -160,6 +169,37 @@ def test_affordable_experiment_retrains(env, model_run):
     assert (env.root / "logs" / "EXP-T14" / "scores.parquet").exists()
     assert set(mt["rank_ic_affordable"]) == {"this", "EXP-T01"}
     assert "rule_adoption" in mt
+
+
+def test_leak_check_uses_t_only():
+    """EXP-003 の判断基準1は Rank IC の t値の絶対値 < 2 だけ（平均の大きさは参考。評価役のフェーズ4計画の指摘 低1）。"""
+    from src.backtest.evaluate import leak_check
+    dist = pd.DataFrame({"budget": "fixed", "cost": "cost_0.3%", "annual_excess_vs_universe": np.linspace(-0.3, 0.1, 101)})
+    bt = {"fixed": {"cost_0.3%": {"annual_excess_vs_universe": -0.1}}}
+    lc = leak_check({"mean": 0.008, "t": 1.5}, bt, dist)
+    assert lc["ic_ok"] and not lc["ic_mean_abs_below_0.005_reference"] and lc["no_leak_found"]
+    assert not leak_check({"mean": 0.001, "t": -2.1}, bt, dist)["no_leak_found"]
+    assert not leak_check({"mean": 0.0, "t": 0.0}, {"fixed": {"cost_0.3%": {"annual_excess_vs_universe": 0.2}}},
+                          dist)["no_leak_found"]
+
+
+def test_rule_adoption_requires_all_offsets():
+    """候補9：開始週のすべてで、両方のコストで基本ルールを上回らなければ採用しない（評価役のフェーズ4計画の指摘 低2）。"""
+    from src.backtest.evaluate import rule_adoption
+    rng = np.random.default_rng(1)
+    b = rng.normal(0, 0.02, 200)
+    base_w = pd.DataFrame({"fixed|cost_0.3%": b})
+    cand_w = pd.DataFrame({"fixed|cost_0.3%": b + 0.01 + rng.normal(0, 0.001, 200)})
+    base_m = {"fixed": {c: {"annual_excess_vs_universe": 0.0, "max_drawdown": -0.3} for c in ("cost_0.3%", "cost_tick")}}
+
+    def cand(offs_tick):
+        return {"fixed": {"cost_0.3%": {"annual_excess_vs_universe": 0.1, "max_drawdown": -0.3,
+                                        "offsets": [{"annual_excess_vs_universe": 0.1}, {"annual_excess_vs_universe": 0.1}]},
+                          "cost_tick": {"annual_excess_vs_universe": 0.05, "max_drawdown": -0.3,
+                                        "offsets": [{"annual_excess_vs_universe": x} for x in offs_tick]}}}
+    assert rule_adoption(cand([0.1, 0.01]), cand_w, base_m, base_w)["adopt"]
+    ra = rule_adoption(cand([0.1, -0.01]), cand_w, base_m, base_w)     # 平均は上回るが、開始週1で下回る
+    assert not ra["adopt"] and ra["better_excess_all_offsets"]["cost_tick"] == [True, False]
 
 
 def test_select_model_rule():

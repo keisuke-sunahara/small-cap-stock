@@ -38,8 +38,10 @@
 - 候補1 地合いフィルター（market_ok）：予測日 p の判定が False なら新しく買わない。継続の判断の日 c の判定が False なら、
   保有銘柄を継続せずに最終営業日の引けで売る（c の時点で分かる情報だけで判断する）
 - 候補2 損切り（stop_loss）：買いの約定の後、逆指値 = 買値 × (1 − stop_loss) を呼値で切り下げた価格。毎営業日、日足で判定する
-  （execution.stop_triggered）。継続保有中も最初の買値の逆指値を使い、分割・併合があれば係数で直す。最終営業日に当たった場合も
-  損切りで売ったものとする（保守的）。損切りで売った後、その週は現金のまま。最終営業日に損切りで売った銘柄は、継続の判断の日 c
+  （execution.stop_triggered。窓を開けたら始値、場中に触れたら 逆指値の価格 − 1呼値。stop_fill = "low" は参考で、触れた日の安値）。
+  当たった日にストップ安のフラグがあり終値が安値と同じ（張り付いた）なら、その日は売れず、次に売買が成立した日の始値で売る
+  （引成の売りと同じ判定。評価役のフェーズ4計画の指摘 中1）。継続保有中も最初の買値の逆指値を使い、分割・併合があれば係数で直す。
+  最終営業日に当たった場合も損切りで売ったものとする（保守的）。損切りで売った後、その週は現金のまま。最終営業日に損切りで売った銘柄は、継続の判断の日 c
   の時点では保有していたので、継続の判断の「上位N」では保有銘柄として数える（prev_day のとき）
 - 候補3 決算の回避（avoid）：avoid(日, 期間の最初の日, 最後の日) が True の銘柄を、p では順位付けの対象から除き（期間 = 保有する週の
   最初の営業日〜最後の営業日の暦日）、c では継続しない・「上位N」に数えない（期間 = その週の最終営業日〜次の保有期間の最終営業日）
@@ -64,7 +66,7 @@ import numpy as np
 import pandas as pd
 
 from src.backtest.execution import (EPS, buy_filled, close_sell_filled, limit_price, market_buy_filled,
-                                    open_sell_filled, order_shares, stop_price, stop_triggered, tick_size,
+                                    open_sell_filled, order_shares, stop_price, stop_triggered, tick_size, STOP_FILLS,
                                     within_turnover_cap, floor_to_tick)
 from src.backtest.market import Market
 from src.backtest.target import Week, make_weeks
@@ -91,6 +93,7 @@ class Rules:
     cost_model: str = "flat"
     buy_order: str = "limit"
     stop_loss: float | None = None
+    stop_fill: str = "tick_below"
     weighting: str = "equal"
     rank_weights: tuple[float, ...] = ()
     max_weight: float = 0.5
@@ -106,12 +109,14 @@ class Rules:
                   budget_mode=cfg["backtest"].get("budget_mode", "min_equity"),
                   cost_model=cfg["cost"].get("model", "flat"),
                   buy_order=rl.get("buy_order", "limit"), stop_loss=rl.get("stop_loss"),
+                  stop_fill=rl.get("stop_fill", "tick_below"),
                   weighting=rl.get("weighting", "equal"), rank_weights=tuple(rl.get("rank_weights") or ()),
                   max_weight=rl.get("max_weight", 0.5), holding_weeks=int(rl.get("holding_weeks", 1)))
         kw.update(override)
         kw["rank_weights"] = tuple(kw["rank_weights"])
         for key, allowed in (("continuation", CONTINUATION_MODES), ("budget_mode", BUDGET_MODES),
-                             ("cost_model", COST_MODELS), ("buy_order", BUY_ORDERS), ("weighting", WEIGHTINGS)):
+                             ("cost_model", COST_MODELS), ("buy_order", BUY_ORDERS), ("weighting", WEIGHTINGS),
+                             ("stop_fill", STOP_FILLS)):
             if kw[key] not in allowed:
                 raise ValueError(f"{key} は {allowed} のどれか: {kw[key]}")
         if kw["weighting"] == "rank" and len(kw["rank_weights"]) != kw["n_holdings"]:
@@ -276,6 +281,8 @@ class Backtester:
         pos: dict[int, float] = {}       # 銘柄の位置 → 株数（分割で小数になりうる）
         pending: dict[int, float] = {}   # 売れ残り（次に売買が成立した日の始値で売る）
         stops: dict[int, float] = {}     # 損切りの逆指値の価格（候補2）
+        stop_pending: set[int] = set()   # 損切りに当たったがストップ安に張り付いて売れなかった銘柄（売れ残りのうち）
+        stop_events: list[tuple] = []    # 損切りに当たった日（日付, 銘柄, 窓を開けたか, 張り付いて売れなかったか, 逆指値の価格）
         trades: list[tuple] = []
         order_rows: list[dict] = []
         week_rows: list[dict] = []
@@ -328,7 +335,7 @@ class Backtester:
                                            base / r.n_holdings, float("inf") if fixed else cash, score_fn, exclude)
                 if r.weighting != "equal":
                     orders = self.reweight_orders(p, orders, sorted(pos), base, float("inf") if fixed else cash)
-            n_filled = n_stop = 0
+            n_filled = n_stop = n_stop_stuck = 0
             invested_after_open = False
             stopped_last_day: set[int] = set()
             for t in w.days:
@@ -346,12 +353,15 @@ class Backtester:
                         px = self.C_ff[m.last_listed[j], j]
                         sh = book.pop(j)
                         stops.pop(j, None)
+                        stop_pending.discard(j)
                         cash += trade(t, j, "sell", sh, px, "delisted")
                 # 寄付：売れ残りの売り
                 for j in list(pending):
                     if open_sell_filled(m.O[t, j]):
                         sh = pending.pop(j)
-                        cash += trade(t, j, "sell", sh, m.O[t, j], "open_retry")
+                        reason = "stop_loss_retry" if j in stop_pending else "open_retry"
+                        stop_pending.discard(j)
+                        cash += trade(t, j, "sell", sh, m.O[t, j], reason)
                 # 寄付：買い
                 bought_today: set[int] = set()
                 if t == w.first:
@@ -378,13 +388,19 @@ class Backtester:
                 # 損切りの逆指値（候補2）
                 if r.stop_loss is not None:
                     for j in list(pos):
-                        px = stop_triggered(m.O[t, j], m.L[t, j], stops[j], j in bought_today)
-                        if px is None:
+                        hit = stop_triggered(m.O[t, j], m.L[t, j], stops[j], j in bought_today, r.stop_fill)
+                        if hit is None:
                             continue
+                        px, gap = hit
                         sh = pos.pop(j)
-                        stops.pop(j)
-                        reason = "stop_loss_gap" if (j not in bought_today and px == m.O[t, j]) else "stop_loss"
-                        cash += trade(t, j, "sell", sh, px, reason)
+                        stuck = not close_sell_filled(m.C[t, j], m.L[t, j], bool(m.LL[t, j]))
+                        stop_events.append((m.dates[t], j, gap, stuck, stops.pop(j)))
+                        if stuck:
+                            pending[j] = sh          # ストップ安に張り付いて売れない → 次に売買が成立した日の始値
+                            stop_pending.add(j)
+                            n_stop_stuck += 1
+                        else:
+                            cash += trade(t, j, "sell", sh, px, "stop_loss_gap" if gap else "stop_loss")
                         n_stop += 1
                         if t == w.last:
                             stopped_last_day.add(j)
@@ -415,7 +431,8 @@ class Backtester:
                               "equity": equity[w.last], "n_orders": len(orders), "n_filled": n_filled,
                               "invested": invested_after_open, "n_held_end": len(pos),
                               "n_pending_end": len(pending), "traded_value": flow["traded"],
-                              "cost_paid": flow["cost"], "skip_reason": skip_reason, "n_stop": n_stop})
+                              "cost_paid": flow["cost"], "skip_reason": skip_reason, "n_stop": n_stop,
+                              "n_stop_stuck": n_stop_stuck})
             flow["traded"] = flow["cost"] = 0.0
         weekly = pd.DataFrame(week_rows)
         prev = np.concatenate([[equity[weeks[0].pred]], weekly["equity"].to_numpy()[:-1]])
@@ -434,4 +451,5 @@ class Backtester:
             trades_df["code"] = m.codes[trades_df["j"].to_numpy()]
         return Result(dates=m.dates, equity=equity, curve=curve, weekly=weekly, orders=orders_df, trades=trades_df,
                       rules=r, meta={"start_pred": m.dates[weeks[0].pred], "end": m.dates[weeks[-1].last],
-                                     "offset": offset})
+                                     "offset": offset,
+                                     "stop_events": pd.DataFrame(stop_events, columns=["date", "j", "gap", "stuck", "stop"])})

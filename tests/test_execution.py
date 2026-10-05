@@ -3,6 +3,7 @@ import math
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from src.backtest.execution import (buy_filled, close_sell_filled, floor_to_tick, limit_price, open_sell_filled,
                                     order_shares, tick_size, within_turnover_cap)
@@ -108,8 +109,18 @@ def test_stop_price_and_trigger():
     assert stop_price(500.0, 0.08) == 460.0
     assert stop_price(3010.0, 0.08) == 2769.0                 # 2769.2 → 1円単位で切り下げ
     assert stop_price(3500.0, 0.08) == 3220.0                 # 3220 は 5円単位
-    assert stop_triggered(470.0, 455.0, 460.0, False) == 460.0   # 場中に逆指値の価格に届いた
-    assert stop_triggered(450.0, 440.0, 460.0, False) == 450.0   # 窓を開けて下回った → 始値
-    assert stop_triggered(450.0, 440.0, 460.0, True) == 460.0    # 買った日は安値だけで判定
+    # 場中に逆指値の価格に触れた → 逆指値の価格 − 1呼値（評価役のフェーズ4計画の指摘 中1）
+    assert stop_triggered(470.0, 455.0, 460.0, False) == (459.0, False)
+    assert stop_triggered(450.0, 440.0, 460.0, False) == (450.0, True)    # 窓を開けて下回った → 始値
+    assert stop_triggered(450.0, 440.0, 460.0, True) == (459.0, False)    # 買った日は安値だけで判定
+    assert stop_triggered(470.0, 460.0, 460.0, False) == (459.0, False)   # 安値がちょうど逆指値の価格でも当たる
     assert stop_triggered(470.0, 461.0, 460.0, False) is None
+    # 1呼値は逆指値の価格の帯の呼値（3,005円は5円単位 → 3,000円、3,000円は1円単位 → 2,999円）
+    assert stop_triggered(3100.0, 2990.0, 3005.0, False) == (3000.0, False)
+    assert stop_triggered(3100.0, 2990.0, 3000.0, False) == (2999.0, False)
+    # 参考の計算：触れた日の安値で売れたとする（窓を開けた場合も安値）
+    assert stop_triggered(470.0, 455.0, 460.0, False, fill="low") == (455.0, False)
+    assert stop_triggered(450.0, 440.0, 460.0, False, fill="low") == (440.0, True)
+    with pytest.raises(ValueError):
+        stop_triggered(470.0, 455.0, 460.0, False, fill="close")
     assert stop_triggered(float("nan"), float("nan"), 460.0, False) is None   # 寄らない日は売れない

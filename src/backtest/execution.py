@@ -94,19 +94,28 @@ def stop_price(buy_price: float, stop_loss: float) -> float:
     return floor_to_tick(buy_price * (1 - stop_loss))
 
 
-def stop_triggered(open_price: float, low: float, stop: float, bought_today: bool) -> float | None:
-    """損切りの逆指値が約定する価格（約定しなければ None）。日足で判定する。
+STOP_FILLS = ("tick_below", "low")
 
-    - 始値が無い日（売買不成立・ストップ安で寄らない）は売れない（次の営業日に同じ判定をする）
-    - 買った日：始値（買値）より後の値動きなので、安値 ≤ 逆指値の価格なら逆指値の価格で売る
-    - それ以外の日：始値 ≤ 逆指値の価格なら始値で売る（窓を開けて下回った）。そうでなく安値 ≤ 逆指値の価格なら逆指値の価格
+
+def stop_triggered(open_price: float, low: float, stop: float, bought_today: bool,
+                   fill: str = "tick_below") -> tuple[float, bool] | None:
+    """損切りの逆指値が当たったときの (約定価格, 窓を開けたか)。当たらなければ None。日足で判定する。
+
+    - 始値が無い日（売買不成立・ストップ安で寄らない）は当たらない（次の営業日に同じ判定をする）
+    - 窓を開けて下回った（買った日以外で 始値 ≤ 逆指値の価格）：始値で売る
+    - 場中に触れた（安値 ≤ 逆指値の価格。買った日は始値（買値）より後の値動きなので、こちらだけで判定する）：
+      逆指値の価格 − 1呼値 で売る（逆指値の成行が、触れた価格より1呼値下で約定するとみなす。評価役のフェーズ4計画の指摘 中1）
+    - fill = "low"：参考の計算。どちらの場合も、その日の安値で売れたとする
+    - ストップ安で張り付いた日は売れない。この判定は呼び出し側（engine）で行う
     """
+    if fill not in STOP_FILLS:
+        raise ValueError(f"fill は {STOP_FILLS} のどれか: {fill}")
     if open_price != open_price:
         return None
     if not bought_today and open_price <= stop + EPS:
-        return open_price
+        return (low if fill == "low" and low == low else open_price), True
     if low == low and low <= stop + EPS:
-        return stop
+        return (low if fill == "low" else stop - tick_size(stop)), False
     return None
 
 

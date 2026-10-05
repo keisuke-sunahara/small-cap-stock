@@ -299,33 +299,54 @@ def rule_adoption(cand_metrics: dict, cand_weekly: pd.DataFrame, base_metrics: d
     mdd_c = cand_metrics["fixed"]["cost_0.3%"]["max_drawdown"]
     mdd_b = base_metrics["fixed"]["cost_0.3%"]["max_drawdown"]
     ok_mdd = bool(mdd_c > mdd_b - mdd_tol)
-    return {"better_excess": better, "weekly_diff_t": t, "t_min": t_min, "max_drawdown": [mdd_c, mdd_b],
-            "mdd_ok": ok_mdd, "adopt": bool(all(better.values()) and t == t and t >= t_min and ok_mdd),
-            "excess": {c: [cand_metrics["fixed"][c]["annual_excess_vs_universe"],
-                           base_metrics["fixed"][c]["annual_excess_vs_universe"]] for c in MAIN_COSTS}}
+    out = {"better_excess": better, "weekly_diff_t": t, "t_min": t_min, "max_drawdown": [mdd_c, mdd_b],
+           "mdd_ok": ok_mdd,
+           "excess": {c: [cand_metrics["fixed"][c]["annual_excess_vs_universe"],
+                          base_metrics["fixed"][c]["annual_excess_vs_universe"]] for c in MAIN_COSTS}}
+    adopt = bool(all(better.values()) and t == t and t >= t_min and ok_mdd)
+    if "offsets" in cand_metrics["fixed"]["cost_0.3%"]:
+        # 候補9：H 通りの開始週のすべてで、一律0.3%と銘柄ごとのコストの両方で基本ルールを上回る（評価役のフェーズ4計画の指摘 低2）
+        by_off = {c: [bool(o["annual_excess_vs_universe"] > base_metrics["fixed"][c]["annual_excess_vs_universe"])
+                      for o in cand_metrics["fixed"][c]["offsets"]] for c in MAIN_COSTS}
+        out["better_excess_all_offsets"] = by_off
+        adopt = adopt and all(all(v) for v in by_off.values())
+    out["adopt"] = adopt
+    return out
 
 
 def leak_check(ic: dict, metrics: dict, dist: pd.DataFrame) -> dict:
-    """EXP-003 の判断基準：Rank IC の平均の絶対値 < 0.005 かつ t値の絶対値 < 2、予算固定・一律0.3%の年率の超過リターンが
-    ランダムの分布の 5%点〜95%点 の間。"""
+    """EXP-003 の判断基準：Rank IC の t値の絶対値 < 2（平均の絶対値 < 0.005 は参考。評価役のフェーズ4計画の指摘 低1）、
+    予算固定・一律0.3%の年率の超過リターンがランダムの分布の 5%点〜95%点 の間。"""
     d = dist[(dist["budget"] == "fixed") & (dist["cost"] == "cost_0.3%")]["annual_excess_vs_universe"]
     lo, hi = float(d.quantile(0.05)), float(d.quantile(0.95))
     ex = metrics["fixed"]["cost_0.3%"]["annual_excess_vs_universe"]
-    c1 = bool(abs(ic["mean"]) < 0.005 and abs(ic["t"]) < 2)
+    c1 = bool(abs(ic["t"]) < 2)
     c2 = bool(lo <= ex <= hi)
-    return {"ic_ok": c1, "random_range": [lo, hi], "annual_excess": ex, "random_ok": c2, "no_leak_found": c1 and c2}
+    return {"ic_ok": c1, "ic_mean_abs_below_0.005_reference": bool(abs(ic["mean"]) < 0.005), "random_range": [lo, hi],
+            "annual_excess": ex, "random_ok": c2, "no_leak_found": c1 and c2}
 
 
-def stop_loss_stats(m: Market, trades: pd.DataFrame) -> dict:
-    """損切りの売りの件数、窓を開けた割合、損切りの価格とその日の終値の差（候補2の報告）。"""
-    st = trades[trades["reason"].isin(["stop_loss", "stop_loss_gap"])]
-    if not len(st):
-        return {"stops": 0}
-    t = st["date"].map(m.date_index).to_numpy()
-    close = m.C[t, st["j"].to_numpy()]
-    return {"stops": int(len(st)), "gap_ratio": float((st["reason"] == "stop_loss_gap").mean()),
-            "close_vs_stop_mean": float(np.nanmean(close / st["price"].to_numpy() - 1)),
-            "buys": int((trades["side"] == "buy").sum())}
+def stop_loss_stats(m: Market, res: Result) -> dict:
+    """損切りの報告（候補2。評価役のフェーズ4計画の指摘 中1）：当たった件数、窓を開けた割合、ストップ安に張り付いて
+    その日に売れなかった件数、売った価格とその日の終値の差、張り付いた銘柄を後日の始値で売った価格と逆指値の価格の差。"""
+    ev_ = res.meta.get("stop_events")
+    tr = res.trades
+    if ev_ is None or not len(ev_):
+        return {"stops": 0, "buys": int((tr["side"] == "buy").sum()) if len(tr) else 0}
+    sold = tr[tr["reason"].isin(["stop_loss", "stop_loss_gap"])]
+    t = sold["date"].map(m.date_index).to_numpy()
+    close = m.C[t, sold["j"].to_numpy()]
+    retry = tr[tr["reason"] == "stop_loss_retry"]
+    stuck = ev_[ev_["stuck"]]
+    out = {"stops": int(len(ev_)), "gap": int(ev_["gap"].sum()), "gap_ratio": float(ev_["gap"].mean()),
+           "stuck_limit_down": int(len(stuck)), "sold_same_day": int(len(sold)), "sold_later_open": int(len(retry)),
+           "close_vs_sell_price_mean": float(np.nanmean(close / sold["price"].to_numpy() - 1)) if len(sold) else None,
+           "buys": int((tr["side"] == "buy").sum())}
+    if len(retry):
+        # 売った日より前で最も新しい、同じ銘柄の張り付いた日の逆指値の価格（分割・併合の調整前。件数が少ないので目安）
+        stops = [stuck[(stuck["j"] == j) & (stuck["date"] < d)]["stop"].iloc[-1] for d, j in zip(retry["date"], retry["j"])]
+        out["later_open_vs_stop_mean"] = float(np.nanmean(retry["price"].to_numpy() / np.array(stops) - 1))
+    return out
 
 
 def delisting_of_orders(m: Market, orders: pd.DataFrame) -> dict:

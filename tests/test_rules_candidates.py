@@ -75,9 +75,9 @@ def test_stop_loss_intraday_gap_and_buy_day():
     m.L[5, 2] = 270.0
     res = run(m, const_score(m, {"11110": 3, "22220": 2, "33330": 1}), cfg, stop_loss=0.08, continuation="prev_day")
     st = res.trades[res.trades["reason"].str.startswith("stop")].set_index("code")
-    assert st.loc["11110", "price"] == 460.0 and st.loc["11110", "reason"] == "stop_loss"
+    assert st.loc["11110", "price"] == 459.0 and st.loc["11110", "reason"] == "stop_loss"   # 460 − 1呼値
     assert st.loc["22220", "price"] == 360.0 and st.loc["22220", "reason"] == "stop_loss_gap"
-    assert st.loc["33330", "price"] == 276.0 and st.loc["33330", "date"] == dates[5]   # 300 × 0.92 = 276
+    assert st.loc["33330", "price"] == 275.0 and st.loc["33330", "date"] == dates[5]   # 300 × 0.92 = 276、− 1呼値
     assert res.weekly.loc[0, "n_stop"] == 3
     # 損切りの後、その週は現金のまま（代わりの銘柄は買わない）
     assert (res.trades["side"] == "buy").groupby(res.trades["date"]).sum().get(dates[6], 0) == 0
@@ -96,8 +96,60 @@ def test_stop_loss_on_last_day_counts_as_held_for_continuation():
     cfg = cfg_n(2, 100_000)
     res = run(m, score, cfg, stop_loss=0.08, continuation="prev_day")
     fri = res.trades[res.trades["date"] == dates[9]].set_index("code")
-    assert fri.loc["11110", "reason"] == "stop_loss" and fri.loc["11110", "price"] == 368.0
+    assert fri.loc["11110", "reason"] == "stop_loss" and fri.loc["11110", "price"] == 367.0
     assert fri.loc["22220", "reason"] == "close"           # B は継続しない
+
+
+def test_stop_loss_stuck_at_limit_down_sells_next_open():
+    # 2週目の火曜にストップ安に張り付く（フラグあり、終値 = 安値 = 420）→ その日は売れない。水曜は寄らず、木曜の始値 410 で売る
+    dates = dummy_dates("2024-01-08", 15)
+    c = [500.0] * 6 + [420.0, np.nan, 415.0] + [415.0] * 6
+    m = dummy_market(dates, {"11110": c})
+    m.O[6, 0], m.L[6, 0], m.H[6, 0] = 480.0, 420.0, 480.0
+    m.LL[6, 0] = True
+    m.O[8, 0], m.L[8, 0] = 410.0, 410.0
+    res = run(m, const_score(m, {"11110": 1}), CFG, stop_loss=0.08, continuation="prev_day")
+    sells = res.trades[res.trades["side"] == "sell"]
+    assert sells["date"].tolist()[0] == dates[8]
+    assert sells["reason"].tolist()[0] == "stop_loss_retry" and sells["price"].tolist()[0] == 410.0
+    assert res.weekly.loc[0, "n_stop"] == 1 and res.weekly.loc[0, "n_stop_stuck"] == 1
+    ev_ = res.meta["stop_events"]
+    assert len(ev_) == 1 and bool(ev_["stuck"].iloc[0]) and not bool(ev_["gap"].iloc[0])
+    # 損切りの後、その週は買い直さない。次の週は通常どおり選ばれて買う
+    assert res.trades[res.trades["side"] == "buy"]["date"].tolist() == [dates[5], dates[10]]
+    from src.backtest.evaluate import stop_loss_stats
+    stt = stop_loss_stats(m, res)
+    assert stt["stops"] == 1 and stt["stuck_limit_down"] == 1 and stt["sold_later_open"] == 1
+    assert abs(stt["later_open_vs_stop_mean"] - (410.0 / 460.0 - 1)) < 1e-12
+
+
+def test_stop_loss_limit_down_not_stuck_sells_same_day():
+    # ストップ安のフラグがあっても、終値が安値より上なら（張り付いていない）その日に売れる
+    dates = dummy_dates("2024-01-08", 15)
+    m = dummy_market(dates, {"11110": [500.0] * 6 + [430.0] * 9})
+    m.O[6, 0], m.L[6, 0], m.H[6, 0] = 480.0, 420.0, 480.0
+    m.LL[6, 0] = True
+    res = run(m, const_score(m, {"11110": 1}), CFG, stop_loss=0.08, continuation="prev_day")
+    st = res.trades[res.trades["reason"] == "stop_loss"]
+    assert st["date"].tolist() == [dates[6]] and st["price"].tolist() == [459.0]
+    assert res.weekly.loc[0, "n_stop_stuck"] == 0
+
+
+def test_stop_loss_fill_low_reference_and_tick_cost():
+    dates = dummy_dates("2024-01-08", 15)
+    m = dummy_market(dates, {"11110": [500.0] * 15})
+    m.L[6, 0] = 455.0
+    score = const_score(m, {"11110": 1})
+    low = run(m, score, CFG, stop_loss=0.08, continuation="prev_day", stop_fill="low")
+    assert low.trades[low.trades["reason"] == "stop_loss"]["price"].tolist() == [455.0]
+    # 銘柄ごとのコストは約定価格（459円）で計算する：max(0.3%, 1 ÷ 459)
+    tk = run(m, score, CFG, stop_loss=0.08, continuation="prev_day", cost=0.003, cost_model="tick")
+    sell = tk.trades[tk.trades["reason"] == "stop_loss"].iloc[0]
+    buy = tk.trades[tk.trades["side"] == "buy"].iloc[0]
+    want = buy["shares"] * buy["price"] * max(0.003, 1 / buy["price"]) + sell["shares"] * 459.0 * max(0.003, 1 / 459.0)
+    assert abs(tk.weekly.loc[0, "cost_paid"] - want) < 1e-6
+    with pytest.raises(ValueError):
+        run(m, score, CFG, stop_loss=0.08, stop_fill="close")
 
 
 # ---- 候補3 決算の回避 ----
