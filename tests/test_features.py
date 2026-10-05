@@ -179,6 +179,33 @@ def test_next_earnings_uses_only_published_schedule():
     assert np.isnan(x[i["2024-05-14"]])                   # 予定日の当日以降は「次」が分からない
 
 
+def test_next_earnings_undecided_record_clears_the_quarter():
+    """予定日が「未定」に変わると SchDate が空欄の記録が追加される。同じ四半期の最新が「未定」なら、その予定日は不明。"""
+    dates = dummy_dates("2024-04-01", 40)
+    m = dummy_market(dates, {"11110": [1000.0] * 40})
+    sched = [
+        {"PubDate": "2024-04-03", "Code": "11110", "SchDate": "2024-05-10", "FQName": "FY", "FYE": "0331"},
+        {"PubDate": "2024-04-05", "Code": "11110", "SchDate": "2024-05-31", "FQName": "1Q", "FYE": "1231"},
+        # 本決算（FY・0331）の予定日が「未定」に変わる
+        {"PubDate": "2024-04-10", "Code": "11110", "SchDate": "", "FQName": "FY", "FYE": "0331"},
+        # 改めて予定日が公表される
+        {"PubDate": "2024-04-24", "Code": "11110", "SchDate": "2024-05-20", "FQName": "FY", "FYE": "0331"},
+    ]
+    x = feat("cdays_to_next_earnings", make_fd(m, sched_rows=sched))[:, 0]
+    i = {d: k for k, d in enumerate(dates)}
+    day = lambda a, b: (pd.Timestamp(a) - pd.Timestamp(b)).days  # noqa: E731
+    assert x[i["2024-04-10"]] == day("2024-05-10", "2024-04-10")   # 「未定」は公表日の次の営業日から
+    # 「未定」の間は、古い予定日（5/10）ではなく、ほかの四半期の予定日（5/31）が「次」になる
+    assert x[i["2024-04-11"]] == day("2024-05-31", "2024-04-11")
+    assert x[i["2024-04-24"]] == day("2024-05-31", "2024-04-24")
+    assert x[i["2024-04-25"]] == day("2024-05-20", "2024-04-25")
+    # 予定日が「未定」だけの銘柄は NaN
+    only = [{"PubDate": "2024-04-03", "Code": "11110", "SchDate": "2024-05-10", "FQName": "FY", "FYE": "0331"},
+            {"PubDate": "2024-04-10", "Code": "11110", "SchDate": "", "FQName": "FY", "FYE": "0331"}]
+    y = feat("cdays_to_next_earnings", make_fd(m, sched_rows=only))[:, 0]
+    assert np.isfinite(y[i["2024-04-10"]]) and np.isnan(y[i["2024-04-11"]:]).all()
+
+
 # ---- 未来情報の混入 ----
 
 def test_no_future_information_dummy():
@@ -204,10 +231,10 @@ def test_no_future_information_dummy():
                                 Sales=rng.uniform(1e9, 2e9), OP=rng.normal(1e8, 5e7),
                                 Eq=rng.uniform(1e8, 1e9), FSales=2e9, FOP=rng.normal(1e8, 5e7), FNP=5e7,
                                 NxFSales=2e9, NxFOP=rng.normal(1e8, 5e7), NxFNp=5e7))
+            sch = (pd.Timestamp(str(dates[0])) + pd.Timedelta(days=int(rng.integers(0, 150)))).date().isoformat()
             sched.append({"PubDate": str(dates[rng.integers(0, 90)]), "Code": c,
-                          "SchDate": (pd.Timestamp(str(dates[0])) + pd.Timedelta(days=int(rng.integers(0, 150)))
-                                      ).date().isoformat(), "FQName": str(rng.choice(["1Q", "2Q", "3Q", "FY"])),
-                          "FYE": "0331"})
+                          "SchDate": "" if rng.random() < 0.2 else sch,   # 2割は「未定」
+                          "FQName": str(rng.choice(["1Q", "2Q", "3Q", "FY"])), "FYE": "0331"})
     full = make_fd(m, rows, sched)
     for p in (30, 61, 75):
         cut_m = m.truncated(p)

@@ -1,0 +1,83 @@
+{
+ "definition": {
+  "deviation_from_both_neighbors": "> 10%",
+  "neighbor_agreement_log": 0.02,
+  "fix_tol": 0.05
+ },
+ "detected_before_fix": {
+  "reports": 179,
+  "codes": 159,
+  "by_class": {
+   "期末日の後〜開示日に分割・併合": 85,
+   "近くに分割・併合なし": 50,
+   "期末日の前10営業日以内に分割・併合": 44
+  }
+ },
+ "detected_after_fix": {
+  "reports": 46,
+  "codes": 39
+ },
+ "fixed": {
+  "reports": 157,
+  "codes": 145,
+  "by_type": {
+   "after": 103,
+   "before": 54
+  },
+  "detected_and_fixed": 129,
+  "fixed_not_detected": 28,
+  "detected_not_fixed_by_class": {
+   "近くに分割・併合なし": 50
+  }
+ },
+ "prediction_dates": {
+  "n_dates": 364,
+  "first": "2018-09-28",
+  "last": "2025-09-19",
+  "universe_rows_before": 395380,
+  "universe_rows_after": 395549,
+  "left_universe": 87,
+  "left_universe_mcap_over_cap": 87,
+  "entered_universe": 256,
+  "entered_universe_mcap_was_over_cap": 256,
+  "mcap_changed_in_either_universe": 707,
+  "dates_with_universe_change": 229
+ },
+ "features_on_prediction_dates": {
+  "log_mcap": {
+   "changed_in_new_universe": 620,
+   "changed_in_either_universe": 707
+  },
+  "ep_fcst": {
+   "changed_in_new_universe": 572,
+   "changed_in_either_universe": 659
+  },
+  "bp": {
+   "changed_in_new_universe": 620,
+   "changed_in_either_universe": 707
+  },
+  "cdays_to_next_earnings": {
+   "changed_in_new_universe": 186,
+   "changed_in_either_universe": 186
+  }
+ },
+ "undecided_schedule": {
+  "records": 533,
+  "codes": 441,
+  "records_by_year": {
+   "2016": 4,
+   "2017": 32,
+   "2018": 34,
+   "2019": 37,
+   "2020": 211,
+   "2021": 42,
+   "2022": 36,
+   "2023": 43,
+   "2024": 55,
+   "2025": 39
+  },
+  "stock_days_changed_in_universe": 964,
+  "stock_days_changed_in_universe_to_nan": 798,
+  "prediction_dates_changed_in_universe": 186
+ }
+}

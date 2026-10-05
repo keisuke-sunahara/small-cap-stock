@@ -7,6 +7,8 @@
 決算発表予定日（/fins/earnings-date）
 - 公表日（PubDate）の記録は、J-Quants では公表日の翌日の朝（10:05 頃）に更新されるため、
   **公表日の次の営業日の引け後の予測から** 使う（公表時刻が無いので、公表日当日の引け後には使わない。DECISIONS.md）
+- 予定日が「未定」に変わると、予定日（SchDate）が空欄の記録が追加される（J-Quants の仕様）。空欄の記録も捨てずに残し、
+  予定日を NaN とする（同じ四半期の最新の記録が「未定」なら、予定日は不明。評価役のフェーズ3の指摘・低2、2026-10-05）
 
 ここでは数値への変換と、使える日の位置の計算だけを行い、値の意味づけは src.features.fundamental で行う。
 """
@@ -52,7 +54,13 @@ def prepare_sched(raw: pd.DataFrame, m: Market) -> pd.DataFrame:
     df["Code"] = df["Code"].astype(str)
     # 公表日の次の営業日から使う（公表日が休日でも、その後の最初の営業日）
     df["avail"] = np.searchsorted(np.asarray(m.dates), df["PubDate"].astype(str).to_numpy(), side="right")
-    df = df[(df["avail"] < len(m.dates)) & (df["SchDate"].astype(str).str.len() == 10)].copy()
+    df = df[df["avail"] < len(m.dates)].copy()
+    # 空欄（「未定」）は NaT にする。予定日の形でない値は無い（2016-10〜2025-09 の全件で確認）
+    sch = df["SchDate"].astype(str)
+    bad = (sch.str.len() != 10) & (sch.str.strip() != "")
+    if bad.any():
+        raise ValueError(f"決算発表予定日の形が不明な記録: {df.loc[bad, 'SchDate'].unique()[:5]}")
+    df["SchDate"] = pd.to_datetime(sch.where(sch.str.len() == 10), format="%Y-%m-%d")
     df["j"] = df["Code"].map(m.code_index).astype(int)
     df = df.sort_values(["avail", "PubDate"], kind="stable").reset_index(drop=True)
     return df

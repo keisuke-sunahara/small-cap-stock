@@ -1,7 +1,7 @@
 """特徴量の計算と保存（data/processed/features/）。
 
 - 保存先：data/processed/features/<Market のキャッシュ名>/<特徴量名>.npy と、計算の関数のハッシュ（.json）
-- 関数のソースが変わっていたら（ハッシュが違えば）計算し直す。ただし、登録済みの特徴量の計算方法は変えない決まり
+- 関数のソースが変わっていたら（ハッシュが違えば）、または Market が作り直されていたら（作成日時が違えば）計算し直す。ただし、登録済みの特徴量の計算方法は変えない決まり
   （registry.py）なので、通常はバグの修正のときだけ起きる
 - 特徴量の組の名前（例：all_v1）か、特徴量の名前を指定する
 
@@ -42,10 +42,12 @@ def load_features(names: list[str] | str, cfg: dict | None = None, m: Market | N
     for n in names:
         f = get(n)
         npy, meta = d / f"{n}.npy", d / f"{n}.json"
-        if not rebuild and npy.exists() and meta.exists() and \
-                json.loads(meta.read_text(encoding="utf-8")).get("source_hash") == f.source_hash():
-            out[n] = np.load(npy)
-            continue
+        if not rebuild and npy.exists() and meta.exists():
+            saved = json.loads(meta.read_text(encoding="utf-8"))
+            if saved.get("source_hash") == f.source_hash() and \
+                    saved.get("market", {}).get("built_at_jst") == m.meta.get("built_at_jst"):
+                out[n] = np.load(npy)
+                continue
         if fd is None:
             fd = load_feature_data(m, cfg)
         t0 = time.time()

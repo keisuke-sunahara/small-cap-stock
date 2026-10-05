@@ -29,7 +29,8 @@ from src.data.fetch import business_days, raw_dir
 from src.data.load import read_raw
 
 JST = ZoneInfo("Asia/Tokyo")
-CACHE_VERSION = "v3"   # v2：margin_other を追加、v3：Vo を追加（2026-10-04。ほかの配列は v1 と同じ）
+CACHE_VERSION = "v4"   # v2：margin_other を追加、v3：Vo を追加（2026-10-04。ほかの配列は v1 と同じ）
+# v4：発行済株式数の基準のずれの補正（share_basis。2026-10-05、評価役のフェーズ3の指摘・低1）
 ARRAYS = ["O", "H", "L", "C", "Va", "Vo", "adj", "UL", "LL", "common", "shares_base", "margin_other"]
 
 
@@ -111,14 +112,65 @@ def _latest_fetch(cfg: dict) -> str:
     return latest
 
 
-def build_market(cfg: dict) -> Market:
-    start, end = _period(cfg)
+def share_basis(s: pd.DataFrame, cumF: np.ndarray, tol: float | None, before_days: int = 5) -> pd.DataFrame:
+    """決算短信ごとの株数の基準値（base = 期末の株数 × 期末日までの累積積。分割・併合では変わらない値）。
+
+    s：列 j・sh（期末の発行済株式数）・ref（期末日の位置）・disc（開示日の位置。開示日以前の最後の営業日）を持ち、
+    使える順に並んでいること。列 base と、補正の種類 fix（""：なし、"after"：期末日より後の分割を反映した株数とみなした、
+    "before"：期末日の直前の権利落ちの分割をまだ反映していない株数とみなした）を加えて返す。
+
+    補正（tol が None でなければ。評価役のフェーズ3の指摘・低1、2026-10-05 ユーザーの承認）：
+    同じ銘柄の直前の短信の基準値（補正後）と比べて |log(base ÷ 直前)| > log(1 + tol) のとき、次の時点の累積積で
+    計算し直した値のうち、直前に最も近いものが |log(値 ÷ 直前)| ≤ log(1 + tol) なら、その値を使う。
+    - "after"：期末日の翌営業日〜開示日の各営業日（その間の分割を、短信の株数が遡って反映している。開示日の時点の株数とみなす）
+    - "before"：期末日の before_days 営業日前〜期末日の前の営業日（権利落ち日が期末日の直前で、効力発生日が期末日の後のため、
+      短信の株数が分割前のまま）
+    その範囲に分割・併合が無ければ値は変わらない。ただし、直前の短信の基準値をその補正の比率で戻すと、さらに1つ前の短信の
+    基準値と tol 以内で合う場合（直前の短信が、今回の分割を効力発生の前に先取りして分割後の株数を載せていた場合）は、
+    今回の短信は正しいとみなして補正しない。
+    使うのは、この短信の開示日までの累積積と、それより前に使えた短信だけ（未来の情報を使わない）。
+    範囲を「直前の短信の期末日から」のように広げると、分割を先取りした短信（開示の時点では直せない）の次の正しい短信を、
+    誤った直前の値に合わせてしまうため、上の2つの範囲に限る。
+    """
+    s = s.copy()
+    sh = s["sh"].to_numpy(dtype=float)
+    ref = s["ref"].to_numpy()
+    disc = s["disc"].to_numpy()
+    jj = s["j"].to_numpy()
+    base = sh * cumF[ref, jj]
+    fix = np.full(len(s), "", dtype=object)
+    if tol is not None:
+        lim = np.log1p(tol)
+        for idx in s.groupby("j", sort=False).indices.values():
+            prev_base = prev2_base = np.nan
+            for i in idx:
+                if prev_base == prev_base and abs(np.log(base[i] / prev_base)) > lim:
+                    j, r = jj[i], ref[i]
+                    pos = np.r_[max(r - before_days, 0): r, r + 1: max(disc[i], r) + 1]
+                    if len(pos):
+                        dev = np.abs(np.log(sh[i] * cumF[pos, j] / prev_base))
+                        k = int(np.argmin(dev))
+                        ratio = cumF[pos[k], j] / cumF[r, j]
+                        ahead = prev2_base == prev2_base and abs(np.log(prev_base / ratio / prev2_base)) <= lim
+                        if dev[k] <= lim and not ahead:
+                            base[i] = sh[i] * cumF[pos[k], j]
+                            fix[i] = "after" if pos[k] > r else "before"
+                prev2_base, prev_base = prev_base, base[i]
+    s["base"] = base
+    s["fix"] = fix
+    return s
+
+
+def build_market(cfg: dict, end: str | None = None) -> Market:
+    """end を指定すると、その日までのデータだけで作る（未来情報の混入テスト用。期間の終わりより後は指定できない）。"""
+    start, period_end = _period(cfg)
+    end = period_end if end is None else min(end, period_end)
     cal = read_raw(cfg, "calendar")
     bdays = [d for d in business_days(cal) if start <= d <= end]
     di = {d: i for i, d in enumerate(bdays)}
     T = len(bdays)
 
-    master = read_raw(cfg, "master", columns=["Code", "Mkt", "ProdCat", "Mrgn"])
+    master = read_raw(cfg, "master", end=end, columns=["Code", "Mkt", "ProdCat", "Mrgn"])
     master["Code"] = master["Code"].astype(str)
     master["is_common"] = is_common(master)
     codes = np.array(sorted(master.loc[master["is_common"], "Code"].unique()))
@@ -134,7 +186,7 @@ def build_market(cfg: dict) -> Market:
     last_listed = np.full(N, -1, dtype=np.int64)
     np.maximum.at(last_listed, mj, mi)
 
-    bars = read_raw(cfg, "bars", columns=["Code", "O", "H", "L", "C", "Va", "Vo", "UL", "LL", "AdjFactor"])
+    bars = read_raw(cfg, "bars", end=end, columns=["Code", "O", "H", "L", "C", "Va", "Vo", "UL", "LL", "AdjFactor"])
     bars["Code"] = bars["Code"].astype(str)
     bars = bars[bars["Code"].isin(ci)]
     bi = bars["Date"].map(di).to_numpy()
@@ -157,7 +209,7 @@ def build_market(cfg: dict) -> Market:
     del bars
     cumF = np.cumprod(adj, axis=0)
 
-    s = read_raw(cfg, "summary", columns=["Code", "DiscTime", "ShOutFY", "CurPerEn"])
+    s = read_raw(cfg, "summary", end=end, columns=["Code", "DiscTime", "ShOutFY", "CurPerEn"])
     s["Code"] = s["Code"].astype(str)
     s = s[s["Code"].isin(ci) & (s["ShOutFY"].astype(str).str.strip() != "")].copy()
     s["sh"] = pd.to_numeric(s["ShOutFY"], errors="coerce")
@@ -168,8 +220,10 @@ def build_market(cfg: dict) -> Market:
     ref = np.searchsorted(np.asarray(bdays), s["CurPerEn"].astype(str).to_numpy(), side="right") - 1
     s["ref"] = np.clip(ref, 0, T - 1)
     s["j"] = s["Code"].map(ci)
-    s["base"] = s["sh"].to_numpy() * cumF[s["ref"].to_numpy(), s["j"].to_numpy()]
+    s["disc"] = np.searchsorted(np.asarray(bdays), s["DiscDate"].astype(str).to_numpy(), side="right") - 1
     s = s.sort_values(["avail", "DiscDate", "DiscTime"])  # 同じ日に使えるものは、後の開示を優先
+    s = share_basis(s, cumF, cfg["data"].get("shares_split_fix_tol"),
+                    cfg["data"].get("shares_split_fix_before_days", 5))
     shares_base = np.full((T, N), np.nan)
     shares_base[s["avail"].to_numpy(), s["j"].to_numpy()] = s["base"].to_numpy()
     shares_base = pd.DataFrame(shares_base).ffill().to_numpy()

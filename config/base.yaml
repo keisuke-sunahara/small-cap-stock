@@ -18,6 +18,11 @@ data:
   # この日以降のデータはフェーズ5まで取得・読み込み・集計・グラフ化をしない。
   holdout_start: "2025-09-29"
   raw_dir: data/raw/jquants
+  # 決算短信の発行済株式数の基準のずれの補正（src/backtest/market.py の share_basis）。直前の短信との差が tol を超え、
+  # 期末日の翌営業日〜開示日、または期末日の before_days 営業日前〜前の営業日の累積積で計算し直すと tol 以内になる場合に
+  # 直す。tol が null なら補正しない（2026-10-05 ユーザーの承認、評価役のフェーズ3の指摘・低1。DECISIONS.md）
+  shares_split_fix_tol: 0.05
+  shares_split_fix_before_days: 5
 
 backtest:
   # 過去の売買単位データが無いため、売買単位が100株に統一された2018-10-01以降に限定する（DECISIONS.md参照）

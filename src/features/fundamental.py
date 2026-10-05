@@ -131,21 +131,25 @@ def op_fcst_rev(fd) -> np.ndarray:
 
 
 @register("cdays_to_next_earnings", "fundamental",
-          "次の決算発表予定までの暦日数：その日までに公表された予定日（同じ四半期の変更は最新の公表）のうち、"
-          "その日より後で最も早いもの。分からなければ NaN")
+          "次の決算発表予定までの暦日数：その日までに公表された予定日（同じ四半期の変更は最新の公表。"
+          "最新の公表が「未定」ならその四半期の予定日は不明）のうち、その日より後で最も早いもの。分からなければ NaN")
 def cdays_to_next_earnings(fd) -> np.ndarray:
     m = fd.m
     T, N = len(m.dates), len(m.codes)
     day = np.asarray(m.dates, dtype="datetime64[D]").astype(np.int64)
     out = np.full((T, N), np.nan)
     s = fd.sched
-    sch = np.asarray(s["SchDate"].astype(str), dtype="datetime64[D]").astype(np.int64)
+    has = s["SchDate"].notna().to_numpy()
+    sch = np.where(has, s["SchDate"].to_numpy(dtype="datetime64[D]").astype(np.int64), 0)
     keys = (s["FYE"].astype(str) + "_" + s["FQName"].astype(str)).to_numpy()
     av = s["avail"].to_numpy()
     for j, idx in s.groupby("j").indices.items():
         known: dict[str, int] = {}
         for k, i in enumerate(idx):
-            known[keys[i]] = sch[i]
+            if has[i]:
+                known[keys[i]] = sch[i]
+            else:
+                known.pop(keys[i], None)   # 「未定」：その四半期の予定日は不明
             start = av[i]
             end = av[idx[k + 1]] if k + 1 < len(idx) else T
             if end <= start:
