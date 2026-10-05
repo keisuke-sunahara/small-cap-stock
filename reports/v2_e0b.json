@@ -1,0 +1,1922 @@
+{
+  "created_at_jst": "2026-10-05T20:40:14+09:00",
+  "new_list": {
+    "source": "楽天証券 スーパースクリーナー、種別「かぶミニ寄付」の出力（ユーザーが 2026-10-05 に取得）",
+    "file": "logs/v2_e0/kabumini_yoritsuki_2026-10-05.csv",
+    "rows": 2074,
+    "columns": [
+      "コード",
+      "銘柄名",
+      "市場",
+      "現在値",
+      "前日比(%)"
+    ],
+    "code_format": "4文字（数字4桁、または 130A のような英字入り）。末尾に0を付けて5桁のコードと照合",
+    "markets": {
+      "東P": 1514,
+      "東S": 413,
+      "東G": 147
+    },
+    "not_read": "現在値・前日比の列（2026-10-05 の値）は読んでいない"
+  },
+  "e0b_0_match": {
+    "old_yoritsuki": 2116,
+    "new": 2074,
+    "both": 1985,
+    "old_only": 131,
+    "new_only": [
+      {
+        "code4": "1376",
+        "name": "カネコ種苗",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "1514",
+        "name": "住石ＨＬＤＧ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "1810",
+        "name": "松井建設",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "186A",
+        "name": "アストロスケールＨＬＤＧ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "1873",
+        "name": "日本ハウスＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "1899",
+        "name": "福田組",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "215A",
+        "name": "タイミー",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "2207",
+        "name": "ｍｅｉｔｏ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "2335",
+        "name": "キューブシステム",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "285A",
+        "name": "キオクシアＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "287A",
+        "name": "黒田グループ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "2922",
+        "name": "なとり",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "296A",
+        "name": "令和アカウンティング・ＨＬＤＧ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3133",
+        "name": "海帆",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3154",
+        "name": "メディアスＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "3183",
+        "name": "ウイン・パートナーズ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "3350",
+        "name": "メタプラネット",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "3580",
+        "name": "小松マテーレ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3635",
+        "name": "コーエーテクモＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "3667",
+        "name": "ｅｎｉｓｈ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3763",
+        "name": "プロシップ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3793",
+        "name": "ドリコム",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3810",
+        "name": "サイバーステップ　ＨＬＤＧ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "3905",
+        "name": "データセクション",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "3923",
+        "name": "ラクス",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4004",
+        "name": "レゾナック・ＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4060",
+        "name": "ｒａｋｕｍｏ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "415A",
+        "name": "ＧＭＯ　ＴＥＣＨ　ＨＬＤＧ",
+        "market": "東G",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "416A",
+        "name": "富士ユナイトＨＬＤＧ",
+        "market": "東S",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4170",
+        "name": "Ｋａｉｚｅｎ　Ｐｌａｔｆｏｒｍ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "417A",
+        "name": "ブルーゾーン　ＨＬＤＧ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4412",
+        "name": "サイエンスアーツ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "441A",
+        "name": "ＮＥ",
+        "market": "東G",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4499",
+        "name": "Ｓｐｅｅｅ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "4512",
+        "name": "わかもと製薬",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4563",
+        "name": "アンジェス",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "4565",
+        "name": "ネクセラファーマ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4582",
+        "name": "シンバイオ製薬",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "464A",
+        "name": "ＱＰＳＨＬＤＧ",
+        "market": "東G",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "4709",
+        "name": "ＩＤ　ＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "4845",
+        "name": "スカラ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "5016",
+        "name": "ＪＸ金属",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "5246",
+        "name": "ＥＬＥＭＥＮＴＳ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "543A",
+        "name": "ＡＲＣＨＩＯＮ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "544A",
+        "name": "ＧＭＳ　グループ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "545A",
+        "name": "トランヴィア",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "546A",
+        "name": "ＭＩＲＡＩＮＩ　ＨＬＤＧ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "547A",
+        "name": "ムニノバＨＬＤＧ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "5721",
+        "name": "エスクリプトエナジー",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "5741",
+        "name": "ＵＡＣＪ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "575A",
+        "name": "前澤ＨＬＤＧ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "5909",
+        "name": "コロナ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "590A",
+        "name": "ギフティグループ",
+        "market": "東P",
+        "status": "J-Quants の銘柄一覧（〜2025-09-26）に無い",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "6472",
+        "name": "ＮＴＮ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "6482",
+        "name": "ＹＵＳＨＩＮ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "6485",
+        "name": "前澤給装工業",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "6835",
+        "name": "アライドテレシスＨＬＤＧ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "6890",
+        "name": "フェローテック",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "6996",
+        "name": "ニチコン",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "7172",
+        "name": "ジャパンインベストメントアドバ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "7256",
+        "name": "河西工業",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7352",
+        "name": "ＴＷＯＳＴＯＮＥ＆Ｓｏｎｓ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7590",
+        "name": "タカショー",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7628",
+        "name": "オーハシテクニカ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7776",
+        "name": "セルシード",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7823",
+        "name": "アートネイチャー",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7893",
+        "name": "プロネクサス",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "7962",
+        "name": "キングジム",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "7987",
+        "name": "ナカバヤシ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "8052",
+        "name": "椿本興業",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "8086",
+        "name": "ニプロ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "8165",
+        "name": "千趣会",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "8275",
+        "name": "フォーバル",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "8364",
+        "name": "清水銀行",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "8425",
+        "name": "みずほリース",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "8729",
+        "name": "ソニーフィナンシャルグループ",
+        "market": "東P",
+        "status": "2025-09-26 より前に上場廃止",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9069",
+        "name": "センコーグループＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9090",
+        "name": "ＡＺ−ＣＯＭ丸和ＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9278",
+        "name": "ブックオフグループＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "9319",
+        "name": "中央倉庫",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "9348",
+        "name": "ｉｓｐａｃｅ",
+        "market": "東G",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9405",
+        "name": "朝日放送グループＨＬＤＧ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "9535",
+        "name": "広島ガス",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9616",
+        "name": "共立メンテナンス",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9644",
+        "name": "タナベコンサルティンググループ",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "9788",
+        "name": "ナック",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9830",
+        "name": "トラスコ中山",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": false
+      },
+      {
+        "code4": "9850",
+        "name": "グルメ杵屋",
+        "market": "東P",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      },
+      {
+        "code4": "9896",
+        "name": "ＪＫ　ＨＬＤＧ",
+        "market": "東S",
+        "status": "2025-09-26 に上場",
+        "in_universe_2025_09_26": true
+      }
+    ],
+    "old_only_by_status": {
+      "2025-09-26 に上場": 91,
+      "2025-09-26 より前に上場廃止": 40
+    },
+    "old_only_listed_2025_09_26_in_universe": 28,
+    "old_only_listed_2025_09_26_share_of_old_listed": 0.0438,
+    "new_only_by_status": {
+      "2025-09-26 に上場": 76,
+      "J-Quants の銘柄一覧（〜2025-09-26）に無い": 12,
+      "2025-09-26 より前に上場廃止": 1
+    },
+    "new_only_in_universe_2025_09_26": 39,
+    "old_only_listed_2025_09_26": [
+      {
+        "code4": "1884",
+        "name": "日本道路",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "1890",
+        "name": "東洋建設",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "1909",
+        "name": "日本ドライケミカル",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "1712",
+        "name": "ダイセキ環境ソリューション",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "1726",
+        "name": "ビーアールホールディングス",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "176A",
+        "name": "レジル",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "1949",
+        "name": "住友電設",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "1821",
+        "name": "三井住友建設",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "2150",
+        "name": "ケアネット",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": true
+      },
+      {
+        "code4": "2374",
+        "name": "セントケア・ホールディング",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "2162",
+        "name": "ｎｍｓ ホールディングス",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "2389",
+        "name": "デジタルホールディングス",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "2180",
+        "name": "サニーサイドアップグループ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "2540",
+        "name": "養命酒製造",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "2692",
+        "name": "伊藤忠食品",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3198",
+        "name": "ＳＦＰホールディングス",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3231",
+        "name": "野村不動産ＨＬＤＧＳ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3073",
+        "name": "ＤＤグループ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3271",
+        "name": "ＴＨＥグローバル社",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3294",
+        "name": "イーグランド",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3319",
+        "name": "ゴルフダイジェスト・オン",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": true
+      },
+      {
+        "code4": "3341",
+        "name": "日本調剤",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3141",
+        "name": "ウエルシアＨＤ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3593",
+        "name": "ホギメディカル",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3655",
+        "name": "ブレインパッド",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3480",
+        "name": "ジェイ・エス・ビー",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3681",
+        "name": "ブイキューブ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3526",
+        "name": "芦森工業",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3688",
+        "name": "ＣＡＲＴＡＨＯＬＤＩＮＧＳ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3546",
+        "name": "アレンザホールディングス",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3902",
+        "name": "メディカル・データ・ビジ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "3924",
+        "name": "ランドコンピュータ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4080",
+        "name": "田中化学研究所",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4316",
+        "name": "ビーマップ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4319",
+        "name": "ＴＡＣ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4530",
+        "name": "久光製薬",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4449",
+        "name": "ギフティ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4917",
+        "name": "マンダム",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4745",
+        "name": "東京個別指導学院",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "4974",
+        "name": "タカラバイオ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5009",
+        "name": "富士興産",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5017",
+        "name": "富士石油",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5352",
+        "name": "黒崎播磨",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5191",
+        "name": "住友理工",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5202",
+        "name": "日本板硝子",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5259",
+        "name": "ＢＢＤイニシアティブ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "5727",
+        "name": "東邦チタニウム",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6095",
+        "name": "メドピア",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6096",
+        "name": "レアジョブ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6028",
+        "name": "テクノプロ・ホールディング",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6197",
+        "name": "ソラスト",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6048",
+        "name": "デザインワン・ジャパン",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6201",
+        "name": "豊田自動織機",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6210",
+        "name": "東洋機械金属",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6373",
+        "name": "大同工業",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6406",
+        "name": "フジテック",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6293",
+        "name": "日精樹脂工業",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6486",
+        "name": "イーグル工業",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6489",
+        "name": "前澤工業",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6670",
+        "name": "ＭＣＪ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6937",
+        "name": "古河電池",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": true
+      },
+      {
+        "code4": "6957",
+        "name": "芝浦電子",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6973",
+        "name": "協栄産業",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "6879",
+        "name": "ＩＭＡＧＩＣＡＧＲＯＵＰ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7229",
+        "name": "ユタカ技研",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7240",
+        "name": "ＮＯＫ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7082",
+        "name": "ジモティー",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7088",
+        "name": "フォーラムエンジニアリング",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7092",
+        "name": "ＦＡＳＴＦＩＴＮＥＳＳＪＡＰ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7250",
+        "name": "太平洋工業",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7105",
+        "name": "三菱ロジスネクスト",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7317",
+        "name": "松屋アールアンドディ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7205",
+        "name": "日野自動車",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7605",
+        "name": "フジ・コーポレーション",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7420",
+        "name": "佐鳥電機",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7467",
+        "name": "萩原電気ＨＬＤＧＳ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7718",
+        "name": "スター精密",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7732",
+        "name": "トプコン",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7739",
+        "name": "キヤノン電子",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7817",
+        "name": "パラマウントベッドＨＤ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "7925",
+        "name": "前澤化成工業",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "8279",
+        "name": "ヤオコー",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "8283",
+        "name": "ＰＡＬＴＡＣ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "8515",
+        "name": "アイフル",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9066",
+        "name": "日新",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9338",
+        "name": "ＩＮＦＯＲＩＣＨ",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9067",
+        "name": "丸運",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9386",
+        "name": "日本コンセプト",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9719",
+        "name": "ＳＣＳＫ",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9508",
+        "name": "九州電力",
+        "in_universe_2025_09_26": false,
+        "sell_only_2025_06_10": false
+      },
+      {
+        "code4": "9600",
+        "name": "アイネット",
+        "in_universe_2025_09_26": true,
+        "sell_only_2025_06_10": false
+      }
+    ],
+    "old_only_delisted": [
+      {
+        "code4": "1775",
+        "name": "富士古河Ｅ＆Ｃ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "1973",
+        "name": "ＮＥＣネッツエスアイ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "2107",
+        "name": "東洋精糖",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "2397",
+        "name": "ＤＮＡチップ研究所",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "2715",
+        "name": "エレマテック",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3254",
+        "name": "プレサンスコーポレーション",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3328",
+        "name": "ＢＥＥＮＯＳ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3458",
+        "name": "シーアールイー",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3666",
+        "name": "テクノスジャパン",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3738",
+        "name": "ティーガイア",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3978",
+        "name": "マクロミル",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3990",
+        "name": "ＵＵＵＭ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "3857",
+        "name": "ラック",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "4298",
+        "name": "プロトコーポレーション",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "4551",
+        "name": "鳥居薬品",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "4485",
+        "name": "ＪＴＯＷＥＲ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "5481",
+        "name": "山陽特殊製鋼",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "5759",
+        "name": "日本電解",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "6550",
+        "name": "Ｕｎｉｐｏｓ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "6755",
+        "name": "富士通ゼネラル",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7163",
+        "name": "住信ＳＢＩネット銀行",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7342",
+        "name": "ウェルスナビ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7379",
+        "name": "サーキュレーション",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7408",
+        "name": "ジャムコ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7451",
+        "name": "三菱食品",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7518",
+        "name": "ネットワンシステムズ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "7958",
+        "name": "天馬",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "8114",
+        "name": "デサント",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "8905",
+        "name": "イオンモール",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9055",
+        "name": "アルプス物流",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9058",
+        "name": "トランコム",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9070",
+        "name": "トナミホールディングス",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9384",
+        "name": "内外トランスライン",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9161",
+        "name": "ＩＤ＆Ｅホールディングス",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9164",
+        "name": "トライト",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9260",
+        "name": "西本ＷＩＳＭＥＴＴＡＣＨＤ",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9749",
+        "name": "富士ソフト",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9522",
+        "name": "リニューアブル・ジャパン",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9787",
+        "name": "イオンディライト",
+        "status": "2025-09-26 より前に上場廃止"
+      },
+      {
+        "code4": "9613",
+        "name": "ＮＴＴデータグループ",
+        "status": "2025-09-26 より前に上場廃止"
+      }
+    ],
+    "note": "2025-09-29 以降の上場・上場廃止は、ホールドアウトのため J-Quants では確かめていない"
+  },
+  "e0b_1_coverage": {
+    "new_2026_10_05": {
+      "universe": 1167,
+      "kabumini_buyable": 655,
+      "share": 0.5613,
+      "by_market_cap": [
+        {
+          "band": "50億円未満",
+          "n": 135,
+          "kabumini_buyable": 17,
+          "share": 0.1259
+        },
+        {
+          "band": "50〜100億円",
+          "n": 164,
+          "kabumini_buyable": 46,
+          "share": 0.2805
+        },
+        {
+          "band": "100〜200億円",
+          "n": 299,
+          "kabumini_buyable": 150,
+          "share": 0.5017
+        },
+        {
+          "band": "200〜500億円",
+          "n": 569,
+          "kabumini_buyable": 442,
+          "share": 0.7768
+        }
+      ],
+      "by_turnover": [
+        {
+          "band": "3,000万〜5,000万円",
+          "n": 291,
+          "kabumini_buyable": 157,
+          "share": 0.5395
+        },
+        {
+          "band": "5,000万〜1億円",
+          "n": 384,
+          "kabumini_buyable": 225,
+          "share": 0.5859
+        },
+        {
+          "band": "1〜3億円",
+          "n": 329,
+          "kabumini_buyable": 201,
+          "share": 0.6109
+        },
+        {
+          "band": "3億円以上",
+          "n": 163,
+          "kabumini_buyable": 72,
+          "share": 0.4417
+        }
+      ],
+      "by_market_cap_quintile": [
+        {
+          "quintile": "Q1",
+          "n": 234,
+          "share": 0.1795,
+          "range_oku_yen": [
+            7.1,
+            80.2
+          ]
+        },
+        {
+          "quintile": "Q2",
+          "n": 233,
+          "share": 0.412,
+          "range_oku_yen": [
+            80.2,
+            151.5
+          ]
+        },
+        {
+          "quintile": "Q3",
+          "n": 233,
+          "share": 0.6567,
+          "range_oku_yen": [
+            151.9,
+            242.5
+          ]
+        },
+        {
+          "quintile": "Q4",
+          "n": 233,
+          "share": 0.7554,
+          "range_oku_yen": [
+            242.5,
+            349.5
+          ]
+        },
+        {
+          "quintile": "Q5",
+          "n": 234,
+          "share": 0.8034,
+          "range_oku_yen": [
+            349.6,
+            500.0
+          ]
+        }
+      ],
+      "by_turnover_quintile": [
+        {
+          "quintile": "Q1",
+          "n": 234,
+          "share": 0.5342,
+          "range_oku_yen": [
+            0.3,
+            0.4
+          ]
+        },
+        {
+          "quintile": "Q2",
+          "n": 233,
+          "share": 0.5408,
+          "range_oku_yen": [
+            0.4,
+            0.7
+          ]
+        },
+        {
+          "quintile": "Q3",
+          "n": 233,
+          "share": 0.6438,
+          "range_oku_yen": [
+            0.7,
+            1.1
+          ]
+        },
+        {
+          "quintile": "Q4",
+          "n": 233,
+          "share": 0.618,
+          "range_oku_yen": [
+            1.1,
+            2.1
+          ]
+        },
+        {
+          "quintile": "Q5",
+          "n": 234,
+          "share": 0.4701,
+          "range_oku_yen": [
+            2.1,
+            108.0
+          ]
+        }
+      ]
+    },
+    "old_2024_12_17": {
+      "universe": 1167,
+      "kabumini_buyable": 644,
+      "share": 0.5518,
+      "by_market_cap": [
+        {
+          "band": "50億円未満",
+          "n": 135,
+          "kabumini_buyable": 15,
+          "share": 0.1111
+        },
+        {
+          "band": "50〜100億円",
+          "n": 164,
+          "kabumini_buyable": 42,
+          "share": 0.2561
+        },
+        {
+          "band": "100〜200億円",
+          "n": 299,
+          "kabumini_buyable": 149,
+          "share": 0.4983
+        },
+        {
+          "band": "200〜500億円",
+          "n": 569,
+          "kabumini_buyable": 438,
+          "share": 0.7698
+        }
+      ],
+      "by_turnover": [
+        {
+          "band": "3,000万〜5,000万円",
+          "n": 291,
+          "kabumini_buyable": 149,
+          "share": 0.512
+        },
+        {
+          "band": "5,000万〜1億円",
+          "n": 384,
+          "kabumini_buyable": 219,
+          "share": 0.5703
+        },
+        {
+          "band": "1〜3億円",
+          "n": 329,
+          "kabumini_buyable": 202,
+          "share": 0.614
+        },
+        {
+          "band": "3億円以上",
+          "n": 163,
+          "kabumini_buyable": 74,
+          "share": 0.454
+        }
+      ],
+      "by_market_cap_quintile": [
+        {
+          "quintile": "Q1",
+          "n": 234,
+          "share": 0.1538,
+          "range_oku_yen": [
+            7.1,
+            80.2
+          ]
+        },
+        {
+          "quintile": "Q2",
+          "n": 233,
+          "share": 0.412,
+          "range_oku_yen": [
+            80.2,
+            151.5
+          ]
+        },
+        {
+          "quintile": "Q3",
+          "n": 233,
+          "share": 0.6524,
+          "range_oku_yen": [
+            151.9,
+            242.5
+          ]
+        },
+        {
+          "quintile": "Q4",
+          "n": 233,
+          "share": 0.7339,
+          "range_oku_yen": [
+            242.5,
+            349.5
+          ]
+        },
+        {
+          "quintile": "Q5",
+          "n": 234,
+          "share": 0.8077,
+          "range_oku_yen": [
+            349.6,
+            500.0
+          ]
+        }
+      ],
+      "by_turnover_quintile": [
+        {
+          "quintile": "Q1",
+          "n": 234,
+          "share": 0.5043,
+          "range_oku_yen": [
+            0.3,
+            0.4
+          ]
+        },
+        {
+          "quintile": "Q2",
+          "n": 233,
+          "share": 0.5279,
+          "range_oku_yen": [
+            0.4,
+            0.7
+          ]
+        },
+        {
+          "quintile": "Q3",
+          "n": 233,
+          "share": 0.6052,
+          "range_oku_yen": [
+            0.7,
+            1.1
+          ]
+        },
+        {
+          "quintile": "Q4",
+          "n": 233,
+          "share": 0.6395,
+          "range_oku_yen": [
+            1.1,
+            2.1
+          ]
+        },
+        {
+          "quintile": "Q5",
+          "n": 234,
+          "share": 0.4829,
+          "range_oku_yen": [
+            2.1,
+            108.0
+          ]
+        }
+      ]
+    },
+    "by_prediction_date_new_list": {
+      "note": "今の一覧（2026-10-05）を過去の予測日に当てた参考値。過去の取扱いではなく、未来の情報を含む（後で取扱いに加わった銘柄が入り、それより前に上場廃止した銘柄は入らない）",
+      "n_dates": 84,
+      "min": 0.5576,
+      "median": 0.6154,
+      "max": 0.6853,
+      "first": [
+        "2018-09-28",
+        0.5692
+      ],
+      "by_year_median": {
+        "2018": 0.5763,
+        "2019": 0.6061,
+        "2020": 0.5872,
+        "2021": 0.599,
+        "2022": 0.6655,
+        "2023": 0.6291,
+        "2024": 0.6461,
+        "2025": 0.6026
+      }
+    }
+  },
+  "e0b_2_exp002_top": {
+    "note": "v1 の EXP-002（リッジ、週次・5営業日の目的変数）の点数。v2 のモデルではない。各月末以前の最後の予測日の、点数の高い順（同点は銘柄コードの順）の上位20銘柄と上位20%（順位 ≤ 銘柄数 × 0.2）のうち、一覧にある割合。リターン・成績・Rank IC は計算していない。試行回数に数えない",
+    "months": [
+      {
+        "month": "2024-10",
+        "prediction_date": "2024-10-25",
+        "universe": 917,
+        "top20pct_n": 183,
+        "top20_new": 0.95,
+        "top20pct_new": 0.9016,
+        "universe_new": 0.6696,
+        "top20_old": 0.9,
+        "top20pct_old": 0.9344,
+        "universe_old": 0.6914
+      },
+      {
+        "month": "2024-11",
+        "prediction_date": "2024-11-29",
+        "universe": 947,
+        "top20pct_n": 189,
+        "top20_new": 0.95,
+        "top20pct_new": 0.8413,
+        "universe_new": 0.6494,
+        "top20_old": 0.9,
+        "top20pct_old": 0.873,
+        "universe_old": 0.6779
+      },
+      {
+        "month": "2024-12",
+        "prediction_date": "2024-12-30",
+        "universe": 1006,
+        "top20pct_n": 201,
+        "top20_new": 0.9,
+        "top20pct_new": 0.9055,
+        "universe_new": 0.6481,
+        "top20_old": 0.9,
+        "top20pct_old": 0.9005,
+        "universe_old": 0.669
+      },
+      {
+        "month": "2025-01",
+        "prediction_date": "2025-01-31",
+        "universe": 987,
+        "top20pct_n": 197,
+        "top20_new": 0.75,
+        "top20pct_new": 0.8579,
+        "universe_new": 0.6424,
+        "top20_old": 0.9,
+        "top20pct_old": 0.8832,
+        "universe_old": 0.6646
+      },
+      {
+        "month": "2025-02",
+        "prediction_date": "2025-02-28",
+        "universe": 1071,
+        "top20pct_n": 214,
+        "top20_new": 0.9,
+        "top20pct_new": 0.8271,
+        "universe_new": 0.6405,
+        "top20_old": 0.85,
+        "top20pct_old": 0.8645,
+        "universe_old": 0.6564
+      },
+      {
+        "month": "2025-03",
+        "prediction_date": "2025-03-28",
+        "universe": 1047,
+        "top20pct_n": 209,
+        "top20_new": 0.7,
+        "top20pct_new": 0.8469,
+        "universe_new": 0.6457,
+        "top20_old": 0.75,
+        "top20pct_old": 0.8756,
+        "universe_old": 0.6581
+      },
+      {
+        "month": "2025-04",
+        "prediction_date": "2025-04-25",
+        "universe": 1258,
+        "top20pct_n": 251,
+        "top20_new": 1.0,
+        "top20pct_new": 0.8088,
+        "universe_new": 0.6033,
+        "top20_old": 0.85,
+        "top20pct_old": 0.8207,
+        "universe_old": 0.6073
+      },
+      {
+        "month": "2025-05",
+        "prediction_date": "2025-05-30",
+        "universe": 1142,
+        "top20pct_n": 228,
+        "top20_new": 0.8,
+        "top20pct_new": 0.8509,
+        "universe_new": 0.6025,
+        "top20_old": 0.75,
+        "top20pct_old": 0.8246,
+        "universe_old": 0.6016
+      },
+      {
+        "month": "2025-06",
+        "prediction_date": "2025-06-27",
+        "universe": 1013,
+        "top20pct_n": 202,
+        "top20_new": 0.9,
+        "top20pct_new": 0.8663,
+        "universe_new": 0.6002,
+        "top20_old": 0.9,
+        "top20pct_old": 0.8812,
+        "universe_old": 0.6002
+      },
+      {
+        "month": "2025-07",
+        "prediction_date": "2025-07-25",
+        "universe": 1054,
+        "top20pct_n": 210,
+        "top20_new": 0.9,
+        "top20pct_new": 0.8667,
+        "universe_new": 0.5825,
+        "top20_old": 0.9,
+        "top20pct_old": 0.8619,
+        "universe_old": 0.5816
+      },
+      {
+        "month": "2025-08",
+        "prediction_date": "2025-08-29",
+        "universe": 1190,
+        "top20pct_n": 238,
+        "top20_new": 0.95,
+        "top20pct_new": 0.8067,
+        "universe_new": 0.5613,
+        "top20_old": 0.9,
+        "top20pct_old": 0.7731,
+        "universe_old": 0.5555
+      },
+      {
+        "month": "2025-09",
+        "prediction_date": "2025-09-19",
+        "universe": 1164,
+        "top20pct_n": 232,
+        "top20_new": 0.9,
+        "top20pct_new": 0.8319,
+        "universe_new": 0.5576,
+        "top20_old": 0.85,
+        "top20pct_old": 0.8103,
+        "universe_old": 0.5507
+      }
+    ],
+    "summary": {
+      "top20_new": {
+        "mean": 0.8833,
+        "min": 0.7,
+        "max": 1.0
+      },
+      "top20pct_new": {
+        "mean": 0.851,
+        "min": 0.8067,
+        "max": 0.9055
+      },
+      "universe_new": {
+        "mean": 0.6169,
+        "min": 0.5576,
+        "max": 0.6696
+      },
+      "top20_old": {
+        "mean": 0.8625,
+        "min": 0.75,
+        "max": 0.9
+      },
+      "top20pct_old": {
+        "mean": 0.8586,
+        "min": 0.7731,
+        "max": 0.9344
+      },
+      "universe_old": {
+        "mean": 0.6262,
+        "min": 0.5507,
+        "max": 0.6914
+      }
+    }
+  }
+}
