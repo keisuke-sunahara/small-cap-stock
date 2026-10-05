@@ -1,0 +1,83 @@
+{
+ "feature_set": "all_v1",
+ "features": {
+  "ret_5d": {
+   "description": "過去5営業日の上昇率（t−5 の終値 → t の終値）",
+   "source_hash": "a23490762bd97356"
+  },
+  "ret_20d": {
+   "description": "過去20営業日の上昇率",
+   "source_hash": "f6679601189f2e6c"
+  },
+  "ret_60d": {
+   "description": "過去60営業日の上昇率",
+   "source_hash": "ccdacd3a7a6cd352"
+  },
+  "vol_ratio_5_60": {
+   "description": "出来高の変化率：log((過去5営業日の平均出来高 + 1) ÷ (過去60営業日の平均出来高 + 1))。出来高は分割調整済み",
+   "source_hash": "911ee3585e8da810"
+  },
+  "volatility_20d": {
+   "description": "値動きの大きさ：過去20営業日の日次の対数リターンの標準偏差",
+   "source_hash": "3755273c90a00491"
+  },
+  "dist_high_60d": {
+   "description": "直近高値からの距離：t の終値 ÷ 過去60営業日（t を含む）の高値の最大 − 1",
+   "source_hash": "351a4a11d3c8789d"
+  },
+  "log_turnover_20d": {
+   "description": "売買代金：log(過去20営業日の平均売買代金 + 1)",
+   "source_hash": "21ae83e5cc9a8e77"
+  },
+  "log_mcap": {
+   "description": "時価総額の対数：log(開示済みの発行済株式数 × 終値)",
+   "source_hash": "61c279c40091a67a"
+  },
+  "ep_fcst": {
+   "description": "予想PERの逆数：最新の会社予想の通期純利益 ÷ 時価総額（PER は赤字で符号が反転するため逆数にする）",
+   "source_hash": "b5ef4c18a90156af"
+  },
+  "bp": {
+   "description": "PBR の逆数：最新の決算短信の純資産 ÷ 時価総額",
+   "source_hash": "76f00c97ffbbc583"
+  },
+  "sales_growth_yoy": {
+   "description": "売上高の前年同期比の伸び率（最新の決算短信の期首からの累計）",
+   "source_hash": "9766c1c51d34221b"
+  },
+  "op_chg_to_sales_yoy": {
+   "description": "営業利益の伸び：(営業利益 − 前年同期の営業利益) ÷ 前年同期の売上高（赤字をまたいでも計算できるよう売上高で割る）",
+   "source_hash": "52de5482a8e77a5e"
+  },
+  "bdays_since_report": {
+   "description": "決算発表からの日数：最新の決算短信を使えるようになってからの営業日数",
+   "source_hash": "f4c135e79d2fb28c"
+  },
+  "op_surprise_fy": {
+   "description": "本決算の上振れ・下振れ：(実績の営業利益 − 直前の会社予想の営業利益) ÷ 実績の売上高。次の本決算まで引き継ぐ",
+   "source_hash": "5dac622f8528392f"
+  },
+  "op_fcst_rev": {
+   "description": "会社予想の修正：最新の予想の通期営業利益 − 同じ期の1つ前の予想 を、予想の売上高で割ったもの。その期の最初の予想なら NaN",
+   "source_hash": "3511dc8ccb55e5db"
+  },
+  "cdays_to_next_earnings": {
+   "description": "次の決算発表予定までの暦日数：その日までに公表された予定日（同じ四半期の変更は最新の公表。最新の公表が「未定」ならその四半期の予定日は不明）のうち、その日より後で最も早いもの。分からなければ NaN",
+   "source_hash": "5b5323b1f81fcc56"
+  }
+ },
+ "rows": 395549,
+ "pred_dates": 364,
+ "market": {
+  "built_at_jst": "2026-10-05T10:48:43+09:00",
+  "data_latest_fetch_jst": "2026-10-04T05:45:45+09:00",
+  "period": [
+   "2016-10-05",
+   "2025-09-26"
+  ],
+  "cache_version": "v4"
+ },
+ "git_commit": "82a3b049e27c4caba8f35126cba4c74d2220e193",
+ "created_at_jst": "2026-10-05T10:54:03+09:00",
+ "note": "値は正規化の前（src.features の計算結果そのもの）。ユニバースは src.backtest.universe.universe_mask"
+}

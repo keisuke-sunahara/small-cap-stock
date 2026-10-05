@@ -1,0 +1,526 @@
+{
+ "momentum_20d/fixed/cost_0.3%": {
+  "annual_return": {
+   "before": -0.437854393106623,
+   "after": -0.437854393106623
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.41883354546299967,
+   "after": -0.4188214724475344
+  },
+  "sharpe": {
+   "before": -0.6084072642897492,
+   "after": -0.6084072642897492
+  },
+  "max_drawdown": {
+   "before": -0.9822114609540296,
+   "after": -0.9822114609540296
+  }
+ },
+ "momentum_20d/fixed/cost_tick": {
+  "annual_return": {
+   "before": -0.4650317629089319,
+   "after": -0.4650317629089319
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.44601091526530856,
+   "after": -0.4459988422498433
+  },
+  "sharpe": {
+   "before": -0.6862156695960436,
+   "after": -0.6862156695960436
+  },
+  "max_drawdown": {
+   "before": -0.9874224044278397,
+   "after": -0.9874224044278397
+  }
+ },
+ "momentum_20d/fixed/cost_0.5%": {
+  "annual_return": {
+   "before": -0.4751578267722777,
+   "after": -0.4751578267722777
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.45613697912865436,
+   "after": -0.4561249061131891
+  },
+  "sharpe": {
+   "before": -0.7147455846039317,
+   "after": -0.7147455846039317
+  },
+  "max_drawdown": {
+   "before": -0.988996205147762,
+   "after": -0.988996205147762
+  }
+ },
+ "momentum_20d/fixed/no_cost": {
+  "annual_return": {
+   "before": -0.37700936971290866,
+   "after": -0.37700936971290866
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.35798852206928533,
+   "after": -0.3579764490538201
+  },
+  "sharpe": {
+   "before": -0.44855069843525275,
+   "after": -0.44855069843525275
+  },
+  "max_drawdown": {
+   "before": -0.9634947528634279,
+   "after": -0.9634947528634279
+  }
+ },
+ "momentum_20d/min_equity/cost_0.3%": {
+  "annual_return": {
+   "before": -0.3049183571913173,
+   "after": -0.3049183571913173
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.285897509547694,
+   "after": -0.28588543653222875
+  },
+  "sharpe": {
+   "before": -0.6305086147417596,
+   "after": -0.6305086147417596
+  },
+  "max_drawdown": {
+   "before": -0.9338386666666645,
+   "after": -0.9338386666666645
+  }
+ },
+ "momentum_20d/min_equity/cost_tick": {
+  "annual_return": {
+   "before": -0.3542368508888559,
+   "after": -0.3542368508888559
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.3352160032452326,
+   "after": -0.33520393022976736
+  },
+  "sharpe": {
+   "before": -1.1148650380413518,
+   "after": -1.1148650380413518
+  },
+  "max_drawdown": {
+   "before": -0.9530729999999998,
+   "after": -0.9530729999999998
+  }
+ },
+ "momentum_20d/min_equity/cost_0.5%": {
+  "annual_return": {
+   "before": -0.35276369008604613,
+   "after": -0.35276369008604613
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.3337428424424228,
+   "after": -0.33373076942695756
+  },
+  "sharpe": {
+   "before": -0.7813056462477512,
+   "after": -0.7813056462477512
+  },
+  "max_drawdown": {
+   "before": -0.9523189999999992,
+   "after": -0.9523189999999992
+  }
+ },
+ "momentum_20d/min_equity/no_cost": {
+  "annual_return": {
+   "before": -0.2892232952571322,
+   "after": -0.2892232952571322
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.27020244761350887,
+   "after": -0.2701903745980436
+  },
+  "sharpe": {
+   "before": -0.5867720338135253,
+   "after": -0.5867720338135253
+  },
+  "max_drawdown": {
+   "before": -0.9319999999999999,
+   "after": -0.9319999999999999
+  }
+ },
+ "reversal_5d/fixed/cost_0.3%": {
+  "annual_return": {
+   "before": -0.312236462492154,
+   "after": -0.3167399931525269
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.29321561484853065,
+   "after": -0.2977070724934383
+  },
+  "sharpe": {
+   "before": -0.8374845613533612,
+   "after": -0.8562651182289153
+  },
+  "max_drawdown": {
+   "before": -0.9331243340382409,
+   "after": -0.9361281104773627
+  }
+ },
+ "reversal_5d/fixed/cost_tick": {
+  "annual_return": {
+   "before": -0.3642298901881127,
+   "after": -0.3684864060316625
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.34520904254448936,
+   "after": -0.3494534853725739
+  },
+  "sharpe": {
+   "before": -1.0494776215687107,
+   "after": -1.0690190924988716
+  },
+  "max_drawdown": {
+   "before": -0.9613475071606883,
+   "after": -0.9631218039156241
+  }
+ },
+ "reversal_5d/fixed/cost_0.5%": {
+  "annual_return": {
+   "before": -0.39332689927924047,
+   "after": -0.3972897813123044
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.37430605163561714,
+   "after": -0.37825686065321584
+  },
+  "sharpe": {
+   "before": -1.1800385710328307,
+   "after": -1.199199263640776
+  },
+  "max_drawdown": {
+   "before": -0.9721440100973447,
+   "after": -0.973392201535726
+  }
+ },
+ "reversal_5d/fixed/no_cost": {
+  "annual_return": {
+   "before": -0.17035576794480312,
+   "after": -0.17580762255163107
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.1513349203011798,
+   "after": -0.1567747018925425
+  },
+  "sharpe": {
+   "before": -0.32618068662112615,
+   "after": -0.34453053624767094
+  },
+  "max_drawdown": {
+   "before": -0.8277640350375037,
+   "after": -0.8312864308936498
+  }
+ },
+ "reversal_5d/min_equity/cost_0.3%": {
+  "annual_return": {
+   "before": -0.15327993847203913,
+   "after": -0.1528492959508745
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.1342590908284158,
+   "after": -0.13381637529178592
+  },
+  "sharpe": {
+   "before": -0.3333979539335665,
+   "after": -0.3311191061525819
+  },
+  "max_drawdown": {
+   "before": -0.8522449920395927,
+   "after": -0.8508687353111586
+  }
+ },
+ "reversal_5d/min_equity/cost_tick": {
+  "annual_return": {
+   "before": -0.35260210154438376,
+   "after": -0.35260210154438376
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.33358125390076043,
+   "after": -0.3335691808852952
+  },
+  "sharpe": {
+   "before": -1.4448344371247868,
+   "after": -1.4448344371247868
+  },
+  "max_drawdown": {
+   "before": -0.9561228864161059,
+   "after": -0.9561228864161059
+  }
+ },
+ "reversal_5d/min_equity/cost_0.5%": {
+  "annual_return": {
+   "before": -0.23535638296703987,
+   "after": -0.23535638296703987
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.21633553532341654,
+   "after": -0.2163234623079513
+  },
+  "sharpe": {
+   "before": -0.6077315669177002,
+   "after": -0.6077315669177002
+  },
+  "max_drawdown": {
+   "before": -0.937658483701443,
+   "after": -0.937658483701443
+  }
+ },
+ "reversal_5d/min_equity/no_cost": {
+  "annual_return": {
+   "before": -0.10968229808738938,
+   "after": -0.1054402932182914
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.09066145044376606,
+   "after": -0.08640737255920283
+  },
+  "sharpe": {
+   "before": -0.15123062672665707,
+   "after": -0.14969105203019256
+  },
+  "max_drawdown": {
+   "before": -0.803885853066181,
+   "after": -0.803885853066181
+  }
+ },
+ "random_mean/fixed/cost_0.3%": {
+  "annual_return": {
+   "before": -0.21290099161901013,
+   "after": -0.2128892824090351
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.19388014397538683,
+   "after": -0.19385636174994653
+  },
+  "sharpe": {
+   "before": -0.8769166960343144,
+   "after": -0.8767283098254975
+  },
+  "max_drawdown": {
+   "before": -0.832103778051641,
+   "after": -0.8320423569804882
+  }
+ },
+ "random_mean/fixed/cost_tick": {
+  "annual_return": {
+   "before": -0.2582270814966435,
+   "after": -0.258225871376565
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.23920623385302014,
+   "after": -0.23919295071747643
+  },
+  "sharpe": {
+   "before": -1.1151195048385818,
+   "after": -1.1149715926054362
+  },
+  "max_drawdown": {
+   "before": -0.8825627985551703,
+   "after": -0.8825171222297435
+  }
+ },
+ "random_mean/fixed/cost_0.5%": {
+  "annual_return": {
+   "before": -0.32042281173043274,
+   "after": -0.32041136225703154
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.3014019640868094,
+   "after": -0.301378441597943
+  },
+  "sharpe": {
+   "before": -1.4772179198722668,
+   "after": -1.476971829914014
+  },
+  "max_drawdown": {
+   "before": -0.9345642838992748,
+   "after": -0.934541313795476
+  }
+ },
+ "random_mean/fixed/no_cost": {
+  "annual_return": {
+   "before": -0.01969693112920956,
+   "after": -0.019685201533373047
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.0006760834855862318,
+   "after": -0.0006522808742844767
+  },
+  "sharpe": {
+   "before": 0.021579843790518072,
+   "after": 0.02168050516361442
+  },
+  "max_drawdown": {
+   "before": -0.4913825091863722,
+   "after": -0.4913055953480305
+  }
+ },
+ "random_mean/min_equity/cost_0.3%": {
+  "annual_return": {
+   "before": -0.18861061382135091,
+   "after": -0.18888224546653493
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.16958976617772759,
+   "after": -0.16984932480744638
+  },
+  "sharpe": {
+   "before": -0.7034636465254365,
+   "after": -0.7046761617267632
+  },
+  "max_drawdown": {
+   "before": -0.8149006202268975,
+   "after": -0.8151457895313822
+  }
+ },
+ "random_mean/min_equity/cost_tick": {
+  "annual_return": {
+   "before": -0.3217501688915674,
+   "after": -0.32175698063205194
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.3027293212479441,
+   "after": -0.30272405997296337
+  },
+  "sharpe": {
+   "before": -1.4497569686380356,
+   "after": -1.4485073467842144
+  },
+  "max_drawdown": {
+   "before": -0.9387967692534062,
+   "after": -0.9388793635736098
+  }
+ },
+ "random_mean/min_equity/cost_0.5%": {
+  "annual_return": {
+   "before": -0.26314344267626794,
+   "after": -0.26297206800830836
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.24412259503264458,
+   "after": -0.24393914734921981
+  },
+  "sharpe": {
+   "before": -1.0326766732682744,
+   "after": -1.0306183669873439
+  },
+  "max_drawdown": {
+   "before": -0.9074380093812112,
+   "after": -0.9075069345628836
+  }
+ },
+ "random_mean/min_equity/no_cost": {
+  "annual_return": {
+   "before": -0.01746461518630479,
+   "after": -0.017202315330061693
+  },
+  "annual_excess_vs_universe": {
+   "before": 0.001556232457318536,
+   "after": 0.0018306053290268777
+  },
+  "sharpe": {
+   "before": 0.04183903939518349,
+   "after": 0.043112545488323745
+  },
+  "max_drawdown": {
+   "before": -0.4909521531019243,
+   "after": -0.49102635720256016
+  }
+ },
+ "universe_average/cost_0.3%": {
+  "annual_return": {
+   "before": -0.25965119891308597,
+   "after": -0.2596550399560418
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.24063035126946264,
+   "after": -0.2406221192969532
+  },
+  "sharpe": {
+   "before": -1.4262420549690997,
+   "after": -1.426637604750642
+  },
+  "max_drawdown": {
+   "before": -0.8966310385236648,
+   "after": -0.8966376885851631
+  }
+ },
+ "universe_average/cost_tick": {
+  "annual_return": {
+   "before": -0.27962318025678046,
+   "after": -0.2796216351211843
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.26060233261315713,
+   "after": -0.26058871446209575
+  },
+  "sharpe": {
+   "before": -1.5663952363875355,
+   "after": -1.5667913096401156
+  },
+  "max_drawdown": {
+   "before": -0.9125860348682464,
+   "after": -0.912584821925525
+  }
+ },
+ "universe_average/cost_0.5%": {
+  "annual_return": {
+   "before": -0.3862555835366184,
+   "after": -0.38625584163069515
+  },
+  "annual_excess_vs_universe": {
+   "before": -0.36723473589299505,
+   "after": -0.3672229209716066
+  },
+  "sharpe": {
+   "before": -2.379852394980435,
+   "after": -2.380447108900693
+  },
+  "max_drawdown": {
+   "before": -0.969490194576513,
+   "after": -0.9694911771986092
+  }
+ },
+ "universe_average/no_cost": {
+  "annual_return": {
+   "before": -0.01902084764362333,
+   "after": -0.01903292065908857
+  },
+  "annual_excess_vs_universe": {
+   "before": 0.0,
+   "after": 0.0
+  },
+  "sharpe": {
+   "before": 0.002323283229053987,
+   "after": 0.002217144811270229
+  },
+  "max_drawdown": {
+   "before": -0.3689492503881653,
+   "after": -0.36883723973418003
+  }
+ },
+ "rank_ic/momentum_20d": {
+  "mean": {
+   "before": -0.030795978909258663,
+   "after": -0.030742840773686823
+  },
+  "t": {
+   "before": -4.964529771540779,
+   "after": -4.957201218577425
+  }
+ },
+ "rank_ic/reversal_5d": {
+  "mean": {
+   "before": 0.03880869510148669,
+   "after": 0.038713486115131944
+  },
+  "t": {
+   "before": 7.162790267359036,
+   "after": 7.145686109193229
+  }
+ }
+}
