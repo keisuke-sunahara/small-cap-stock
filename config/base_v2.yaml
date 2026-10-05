@@ -1,0 +1,79 @@
+# v2 の共通の設定（案。2026-10-05、ユーザーの承認の前）。config/base.yaml に重ねる差分だけを書く。
+# 実験の config.yaml は、この設定との差分だけを書く（experiments/README_v2.md）。
+# ルールの文章は docs/CLAUDE_v2_draft.md 第5章、決めた理由は docs/PLAN_v2.md・docs/DECISIONS.md。
+# まだ実装していないキーを含む（フェーズ v2-1 で実装する）。data.holdout_start（2025-09-29）は変えない。
+
+version: v2
+
+capital:
+  initial_capital_jpy: 500000       # 判定に使う資金（ユーザーの判断）
+  n_holdings: 20
+
+cycle:
+  frequency: monthly                # 予測日 = 各暦月の最終営業日（17:30以降）
+  sell_day: 1                       # 翌月の第1営業日の寄付で売る
+  buy_day: 2                        # 翌月の第2営業日の寄付で買う
+  # 【要承認：E0 による変更案】かぶミニの成行の買いはストップ高の値段で余力を拘束するため、2段階で買う（案B）。
+  # 2：第2営業日（1段目）と第3営業日（2段目、1段目で約定した銘柄の買い増し）。1：1段目だけ（案A）
+  buy_stages: 2
+  first_prediction_date: "2018-09-28"
+  last_prediction_date: "2025-07-31"   # 2025-08-29 は総資産の評価の区切りだけ（売りの日がホールドアウトに入る）
+
+account:
+  method: kabumini                  # kabumini（1株単位・寄付取引。主）/ lot100（v1 の方法。比較）
+  equity_fraction: 0.97             # 目標の金額 = 総資産 × 0.97 ÷ N
+  kabumini_bind_spread: 0.0022      # 成行の買いの余力拘束 = (基準値段 + 制限値幅) × (1 + 0.0022) × 株数
+  # 参考の計算：新しく買う銘柄を、かぶミニの一覧（2024-12-17 時点）で買える銘柄に絞る。主の計算は null（全銘柄を買える）
+  kabumini_lineup_filter: null
+  kabumini_lineup_file: logs/v2_e0/kabumini_lineup_2024-12-17.csv
+  # 値幅の限度で寄った日（買い：ストップ高のフラグ かつ 始値 = 高値、売り：ストップ安のフラグ かつ 始値 = 安値）は約定しない
+  no_fill_at_limit_open: true
+
+buffer:
+  keep_top_fraction: 0.20           # 保有銘柄は、順位 ≤ ユニバースの銘柄数 × 0.2 なら持ち続ける。null ならバッファなし（EXP-104）
+
+cost:
+  # かぶミニの寄付取引（片道）。0（主）と 0.0022（リアルタイム取引のスプレッド）の両方を必ず出す
+  kabumini_one_way: [0.0, 0.0022]
+  # 100株の比較（v1 の方法）：一律0.3%と、銘柄ごと（max(0.3%, 1呼値 ÷ 約定価格)）
+  lot100_one_way: 0.003
+  lot100_models: [flat, tick]
+
+order:
+  limit_up_pct: 0.02                # 100株の比較の指値 = 第1営業日の終値 × 1.02 を呼値で切り下げ
+  max_order_to_adv: 0.01            # 目標の金額 ≤ 20日平均売買代金の1%
+
+target:
+  horizon_days: 20                  # 起点 t の entry_offset 営業日後の始値 → exit_offset 営業日後の始値
+  entry_offset: 2
+  exit_offset: 22
+  price: open                       # 始値 → 始値（終値 → 終値ではない）
+
+validation:
+  gap_days: 22                      # 学習の起点は予測日の23営業日前まで
+  retrain_frequency: monthly        # 予測日ごと
+  train_start: "2017-01-01"
+  train_window: rolling
+  train_window_years: 4
+
+features:
+  set: all_v2                       # all_v1 の16個 + ret_220_20d + dist_high_220d（src/features/registry.py に追加する）
+  normalize: rank
+
+model:
+  type: ridge                       # 主。比較は EXP-102（lightgbm、objective: regression）
+  objective: regression
+  target_shuffle: false
+
+# v1 の売買ルールの候補は使わない（すべて base.yaml の初期値のまま）
+
+evaluation:
+  data_cost_annual_jpy: 19800       # J-Quants Light の年間費用。50万円で年3.96%
+  random_runs: 1000                 # ランダムのベースライン（乱数シード0〜999）
+  top_fraction_gate: 0.20           # 基準B：点数の上位20%（コストなし）の年率の超過リターン ≥ データ費用の割合
+  quantiles: 5                      # 予測の5分位ごとの月の平均リターン
+  trial_count_start: 4              # v1 の試行回数（EXP-001・002・004・005）から通算で数える
+  trial_count_limit: 10             # 10回を超えたら止める（基準 J）
+  half_split_year: 2022             # 前半 2018〜2021、後半 2022〜2025
+  # ベースライン（同じ月次・N=20・バッファ）：random, momentum_20d, reversal_5d, universe_mean, topix_buy_and_hold
+  baselines: [random, momentum_20d, reversal_5d, universe_mean, topix_buy_and_hold]

@@ -1,0 +1,5 @@
+# EXP-103：目的変数の並べ替え（情報漏れの確認。試行回数に数えない）。config/base_v2.yaml との差分だけを書く
+base: v2
+model:
+  type: ridge
+  target_shuffle: true        # 起点の日ごとに、同じ日の銘柄の間で目的変数を並べ替える（乱数シード42）

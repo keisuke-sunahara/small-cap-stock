@@ -1,0 +1,3 @@
+# EXP-101：v2 の主の案（リッジ回帰）。config/base_v2.yaml との差分だけを書く（experiments/README_v2.md）
+# base_v2.yaml が主の案そのもの（model.type: ridge、features.set: all_v2、バッファ上位20%）なので、差分は無い
+base: v2

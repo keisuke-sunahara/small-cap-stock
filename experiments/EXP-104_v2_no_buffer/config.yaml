@@ -1,0 +1,6 @@
+# EXP-104：バッファなし（毎月、上位20銘柄に入れ替える。参考で、採用候補にしない）。config/base_v2.yaml との差分だけを書く
+# 点数は、モデルの確定で決めたモデルの実験（EXP-101 か EXP-102）のものを使う。確定したら model_experiment を書いてコミット・送信してから実行する
+base: v2
+model_experiment: null        # モデルの確定の後に EXP-101 か EXP-102 を書く
+buffer:
+  keep_top_fraction: null     # バッファなし：保有銘柄も、予測日の順位が上位 N（買える銘柄だけで数える）に入らなければ売る

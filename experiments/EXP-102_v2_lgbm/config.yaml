@@ -1,0 +1,6 @@
+# EXP-102：LightGBM の回帰（比較）。config/base_v2.yaml との差分だけを書く（experiments/README_v2.md）
+# パラメータは config/base.yaml の model.lightgbm（v1 と同じ固定値）
+base: v2
+model:
+  type: lightgbm
+  objective: regression
